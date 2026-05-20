@@ -9,7 +9,7 @@
 
 # AltStore Skills
 
-Official [Agent Skills](https://agentskills.io/home) for using AltStore AltStore for your apps.
+Official [Agent Skills](https://agentskills.io/home) for using AltStore for your apps.
 
 ## Install
 
