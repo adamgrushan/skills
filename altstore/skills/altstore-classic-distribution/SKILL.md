@@ -109,7 +109,7 @@ Don't replace any other key in either case.
 ### Step 1.5: Present the baseline
 
 **Before composing the message, gather three things:**
-- Read the placeholders sidecar that `enrich_source.py` wrote alongside the enriched `source.json` (default path: `source.json.placeholders.json`). It contains:
+- The placeholders report that `enrich_source.py` printed to stdout, between the `---BEGIN PLACEHOLDERS_REPORT---` and `---END PLACEHOLDERS_REPORT---` markers in Step 1.2's output. Parse the JSON between those markers. It contains:
   - `source_level.untouched` — top-level keys still on placeholder values.
   - `app_level.untouched` — `apps[0]` keys still on placeholder values.
   - `version_level.untouched` — `apps[0].versions[0]` keys still on placeholder values (most importantly `downloadURL`, which the developer must set before the source works).
@@ -117,7 +117,7 @@ Don't replace any other key in either case.
 - Whether `patreonURL` has a real value (developer provided one) or is absent (they declined).
 - The full current contents of `source.json`.
 
-Use the sidecar's lists verbatim — don't re-derive placeholder keys by reading the JSON yourself. The script is the source of truth here.
+Use the report's lists verbatim — don't re-derive placeholder keys by reading the JSON yourself. The script is the source of truth here.
 
 **Choose the "filled in" line:**
 - If Patreon was provided: `Your app's keys, source name, and Patreon URL are filled in.`
@@ -141,25 +141,23 @@ Use the sidecar's lists verbatim — don't re-derive placeholder keys by reading
 >
 > These show up on the catalog page users see when they paste your URL into AltStore — your storefront. 
 >
-> `[bulleted list — one bullet per key in source_level.untouched from the sidecar (after applying caller_should_filter); each key in backticks followed by a short description]`
+> `[bulleted list — one bullet per key in source_level.untouched from the report (after applying caller_should_filter); each key in backticks followed by a short description]`
 >
 > **App-level keys (inside `apps[0]`)** 
 >
 > These show up on the app's detail page inside AltStore.
 >
-> `[bulleted list — one bullet per key in app_level.untouched from the sidecar; each key in backticks followed by a short description]`
+> `[bulleted list — one bullet per key in app_level.untouched from the report; each key in backticks followed by a short description]`
 >
 > **Version-level keys (inside `apps[0].versions[0]`)**
 >
 > These describe this specific release — most importantly `downloadURL`, which AltStore needs to find your IPA.
 >
-> `[bulleted list — one bullet per key in version_level.untouched from the sidecar; each key in backticks followed by a short description]`
+> `[bulleted list — one bullet per key in version_level.untouched from the report; each key in backticks followed by a short description]`
 >
 > **🚀 You can upload this file to your web host now, then add the hosted file's URL in AltStore Classic on your phone to see it in action. 🚀**
 >
 > Or you can get my help — I can guide you on hosting or answer questions about specific key and fill in placeholder values for you.
-
-Silently delete `source.json.placeholders.json`.
 
 ## Stage 2: edit and host, in the developer's preferred order
 

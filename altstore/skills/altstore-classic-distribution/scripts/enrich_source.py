@@ -4,9 +4,9 @@ Enrich a placeholder source.json with metadata extracted from an .ipa file.
 
 This script is the *IPA-derived* leg of Stage 1. The agent calling this skill
 is expected to have already loaded the canonical AltStore example template
-(`ClassicSource.json`) and pruned it to one app + one version; this script's
-job is to walk that pruned template and replace its example values for the
-ten IPA-derivable fields with values drawn from the developer's actual IPA.
+(`ClassicSourceExampleForSkill.json`); this script's job is to walk that template 
+and replace its example values for the ten IPA-derivable fields with values drawn 
+from the developer's actual IPA.
 
 Fields filled in from the IPA. These ALWAYS overwrite whatever was in the
 template, since the template's values are example placeholders the developer
@@ -27,51 +27,6 @@ Most of these come from the `.app` bundle's `Info.plist` (read directly out
 of the zipped IPA). Two come from the IPA's embedded provisioning profile
 (`developerName` ← `TeamName`, `appPermissions.entitlements` ←
 `Entitlements` keys), also read directly out of the zip.
-
-Why the provisioning profile and not `codesign`: `embedded.mobileprovision`
-is a CMS-signed plist that lives at `Payload/<App>.app/embedded.mobileprovision`
-inside every Apple-Developer-Program-signed IPA. It carries the same
-`TeamName` and `Entitlements` payload the code signature does, but we can
-read it with stdlib `plistlib` — no `codesign` shell-out, no tempdir, no
-macOS dependency, no parsing of stderr text. Earlier versions of this
-script invoked `codesign -d --entitlements :- --xml ...`, which on
-macOS 15+ writes per-component output files like `codesign0`, `codesign1`
-into the caller's working directory and emits a deprecation warning. The
-plist read is also faster (no subprocess, no full bundle extract).
-
-Behavior:
-  - IPA contains embedded.mobileprovision (the normal case — Development,
-    Ad Hoc, In-House, and pre-App-Store-strip Distribution builds):
-      `developerName` ← TeamName (e.g. "Jane Doe" personal, "Acme Inc"
-      organization). `appPermissions.entitlements` ← list of Entitlements
-      keys.
-  - IPA has no embedded.mobileprovision (App-Store-distributed binaries
-    that have been re-signed by Apple, or genuinely unsigned IPAs):
-      both fields stay as template values. The developer overrides them
-      in Stage 2.
-
-Note on `developerName`: TeamName is whatever name the developer registered
-their Apple Developer account under. If they want to display something
-different in AltStore (e.g. a brand name distinct from the legal entity),
-they can override it in Stage 2 like any other field. This script provides
-a sane default; it doesn't make a final UX decision.
-
-Privacy usage descriptions (`appPermissions.privacy`) come from `Info.plist`,
-not the code signature. The script extracts every key matching
-`NS*UsageDescription` (e.g. `NSCameraUsageDescription`,
-`NSLocationWhenInUseUsageDescription`) and maps each to its description
-string. If the app declares none, the template's example privacy values are
-replaced with `{}` — same rationale as the entitlements empty-list case.
-
-What this script never does:
-  - Modifies any key outside the ten listed above. `iconURL`, `tintColor`,
-    `subtitle`, `localizedDescription`, `downloadURL`, `screenshots`,
-    `sourceURL`, the top-level `name`, etc. all keep their template
-    placeholder values until Stage 2.
-  - Asks the developer anything. The agent collects all developer-supplied
-    values in Step 1.3+.
-  - Uploads anything anywhere. The script reads the IPA locally and writes
-    the placeholder JSON locally.
 
 Exit codes:
   0  success (placeholder updated)
@@ -342,18 +297,10 @@ def compute_placeholders(placeholder: dict) -> dict:
     Returned shape (always present, may be empty lists):
 
         {
-            "source_level": {
-                "untouched": [<top-level key>, ...],   # preserves source.json order
-                "filled":    [<top-level key>, ...]
-            },
-            "app_level": {
-                "untouched": [<apps[0] key>, ...],
-                "filled":    [<apps[0] key>, ...]
-            },
-            "version_level": {
-                "untouched": [<apps[0].versions[0] key>, ...],
-                "filled":    [<apps[0].versions[0] key>, ...]
-            }
+            "source_level":  {"untouched": [<top-level key>, ...]},          # preserves source.json order
+            "app_level":     {"untouched": [<apps[0] key>, ...]},
+            "version_level": {"untouched": [<apps[0].versions[0] key>, ...]},
+            "caller_should_filter": [...]
         }
 
     `version_level` is reported separately rather than folded into `app_level`
@@ -375,35 +322,29 @@ def compute_placeholders(placeholder: dict) -> dict:
     depends on Steps 1.3/1.4 outcomes — drop them from `source_level.untouched`
     only if the corresponding step set a real value."""
     report: dict = {
-        "source_level": {"untouched": [], "filled": []},
-        "app_level": {"untouched": [], "filled": []},
-        "version_level": {"untouched": [], "filled": []},
+        "source_level": {"untouched": []},
+        "app_level": {"untouched": []},
+        "version_level": {"untouched": []},
         "caller_should_filter": ["name", "patreonURL"],
     }
 
-    for key in placeholder.keys():
-        if key in _STRUCTURAL_SOURCE_KEYS:
-            # apps is filled-via-children; not a developer-facing key to flag.
-            report["source_level"]["filled"].append(key)
-            continue
-        report["source_level"]["untouched"].append(key)
+    # apps is filled-via-children; not a developer-facing key to flag.
+    report["source_level"]["untouched"] = [
+        k for k in placeholder.keys() if k not in _STRUCTURAL_SOURCE_KEYS
+    ]
 
     apps = placeholder.get("apps")
     if isinstance(apps, list) and apps and isinstance(apps[0], dict):
         app = apps[0]
-        for key in app.keys():
-            if key in _FILLED_APP_KEYS:
-                report["app_level"]["filled"].append(key)
-            else:
-                report["app_level"]["untouched"].append(key)
+        report["app_level"]["untouched"] = [
+            k for k in app.keys() if k not in _FILLED_APP_KEYS
+        ]
 
         versions = app.get("versions")
         if isinstance(versions, list) and versions and isinstance(versions[0], dict):
-            for key in versions[0].keys():
-                if key in _FILLED_VERSION_KEYS:
-                    report["version_level"]["filled"].append(key)
-                else:
-                    report["version_level"]["untouched"].append(key)
+            report["version_level"]["untouched"] = [
+                k for k in versions[0].keys() if k not in _FILLED_VERSION_KEYS
+            ]
 
     return report
 
@@ -426,17 +367,6 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         default=None,
         help="Output path. Default: write back to --placeholder.",
-    )
-    p.add_argument(
-        "--placeholders-out",
-        type=Path,
-        default=None,
-        help=(
-            "Path to write the structured placeholders report (JSON) listing "
-            "which source.json keys still hold AltStore's example values. "
-            "Default: <output>.placeholders.json next to the enriched JSON. "
-            "Step 1.5 reads this file to drive the baseline message reliably."
-        ),
     )
     args = p.parse_args(argv)
 
@@ -470,17 +400,13 @@ def main(argv: list[str] | None = None) -> int:
     output = args.output or args.placeholder
     output.write_text(json.dumps(placeholder, indent=2) + "\n")
 
-    # Sidecar report listing which keys still hold AltStore's example values.
-    # Step 1.5 reads this so a small model doesn't have to re-derive the list
-    # by reasoning over the JSON itself.
-    placeholders_out = args.placeholders_out or output.with_suffix(
-        output.suffix + ".placeholders.json"
-    )
+    # Placeholders report listing which keys still hold AltStore's example
+    # values. Emitted to stdout (not a file) so Step 1.5 can read it directly
+    # from this script's output — avoids leaving a sidecar file the agent
+    # would need to remember to clean up.
     report = compute_placeholders(placeholder)
-    placeholders_out.write_text(json.dumps(report, indent=2) + "\n")
 
     print(f"wrote {output}")
-    print(f"wrote {placeholders_out}")
     if notes:
         print("filled in from IPA:")
         for n in notes:
@@ -491,13 +417,11 @@ def main(argv: list[str] | None = None) -> int:
         f"still placeholder: {len(report['source_level']['untouched'])} source-level, "
         f"{len(report['app_level']['untouched'])} app-level, "
         f"{len(report['version_level']['untouched'])} version-level key(s) "
-        f"(see {placeholders_out.name} for the full list)."
+        "(full list in the PLACEHOLDERS_REPORT block below)."
     )
-    print(
-        "next: ask the developer for a source name, then present the baseline "
-        "and ask whether they want to set up hosting first or replace the "
-        "remaining template placeholders first (see Stage 2 in SKILL.md)."
-    )
+    print("---BEGIN PLACEHOLDERS_REPORT---")
+    print(json.dumps(report, indent=2))
+    print("---END PLACEHOLDERS_REPORT---")
     return 0
 
 
