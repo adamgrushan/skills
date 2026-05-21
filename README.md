@@ -63,8 +63,8 @@ npx skills add altstoreio/skills -a claude-code
 ```
 You: Can you help me distribute my app on AltStore Classic?
 
-Claude: I'll get started fetching the AltStore template, identifying the IPA, and enriching it from the IPA now.
-        What would you like to call your source?
+Claude: I'll get started fetching the AltStore template, identifying the IPA, and enriching 
+        it from the IPA now. What would you like to call your source?
 
 You: Adam's Source
 
