@@ -1,0 +1,28 @@
+{
+  "name": "AltStore",
+  "version": "0.1.0",
+  "description": "Distribute and update iOS apps through AltStore Classic without App Store review.",
+  "homepage": "https://altstore.io",
+  "repository": "https://github.com/altstoreio/skills",
+  "keywords": ["altstore", "ios", "sideload", "ipa", "distribution", "source-json"],
+  "skills": "./skills/",
+  "author": {
+    "name": "AltStore",
+    "url": "https://github.com/altstoreio",
+    "email": "support@altstore.io"
+  },
+  "interface": {
+    "displayName": "AltStore",
+    "shortDescription": "Publish iOS apps via AltStore Classic.",
+    "longDescription": "Generate, validate, and host an AltStore Classic source.json so developers can distribute and update iOS apps outside the App Store.",
+    "developerName": "AltStore",
+    "category": "Productivity",
+    "capabilities": ["read", "write"],
+    "websiteURL": "https://altstore.io",
+    "defaultPrompt": [
+      "Help me distribute my app on AltStore Classic.",
+      "Create an AltStore source.json from my IPA.",
+      "Update my AltStore source for a new app version."
+    ]
+  }
+}

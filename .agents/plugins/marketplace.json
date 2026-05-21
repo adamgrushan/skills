@@ -1,0 +1,11 @@
+{
+  "name": "AltStore",
+  "plugins": [
+    {
+      "name": "AltStore",
+      "source": { "source": "local", "path": "./altstore" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}

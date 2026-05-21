@@ -1,0 +1,13 @@
+{
+  "name": "AltStore",
+  "description": "Distribute and update iOS apps through AltStore Classic without App Store review.",
+  "version": "0.1.0",
+  "keywords": ["altstore", "ios", "sideload", "ipa", "distribution", "source-json"],
+  "author": {
+    "name": "AltStore",
+    "url": "https://altstore.io",
+    "email": "support@altstore.io"
+  },
+  "homepage": "https://altstore.io",
+  "repository": "https://github.com/altstoreio/skills"
+}

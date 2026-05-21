@@ -1,28 +1,114 @@
-<p align="center">
-  <br />
-  <img src=https://faq.altstore.io/~gitbook/image?url=https%3A%2F%2F2606795771-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FAfe8qEztjcTjsjjaMBY2%252Fuploads%252FQGRbFk9rdQ37ddG4uK5S%252FAltStoreIcon_Rounded.png%3Falt%3Dmedia%26token%3D1dd5cf66-df1e-4a07-8e8a-1039c4f22ff9&width=768&dpr=2&quality=100&sign=c6d40f83&sv=2 alt="logo" height="100px" />
-  <br />
-</p>
-
-[AltStore](https://altstore.io/) is an alternative app store for apps that push the boundaries of iOS. 
-
-
 # AltStore Skills
 
-Official [Agent Skills](https://agentskills.io/home) for using AltStore for your apps.
+[AltStore](https://altstore.io/) is an alternative app store for apps that push the boundaries of iOS.
 
-## Install
+Publish your app via AltStore Classic, without review by Apple, using our skill. Works with **Claude Code, OpenAI Codex, and Cursor via marketplaces**, and **other agentic coding environments via [skills.sh](https://www.skills.sh/)**.
 
-We recommend using [skills.sh](https://skills.sh) CLI to install the skills.
+## Installation
 
-Install all skills:
+### Claude Code
 
-```bash
-npx skills add altstore/skills
+From within Claude Code:
+
+```
+/plugin
 ```
 
-Install a specific skill:
+Then select `Marketplace`, `+ Add Marketplace`, enter `altstoreio/skills`. Then install the `AltStore` plugin.
+
+Or directly:
+
+```
+/plugin marketplace add altstoreio/skills
+/plugin install AltStore@AltStore
+```
+
+### OpenAI Codex CLI
 
 ```bash
-npx skills add altstore/skills --skill altstore-classic-distribution-skill
+codex plugin marketplace add altstoreio/skills
+codex plugin add AltStore@AltStore
 ```
+
+Or start Codex, run `/plugins`, search for `AltStore`, and install.
+
+### OpenAI Codex Desktop App
+
+First, add the marketplace from your terminal:
+
+```bash
+codex plugin marketplace add altstoreio/skills
+```
+
+Then, in the Codex app, click **Plugins**, find `AltStore` under the AltStore marketplace, and click the **+** button.
+
+### Cursor
+
+```bash
+cursor plugin marketplace add altstoreio/skills
+cursor plugin install altstore
+```
+
+### Other agentic coding environments
+
+Use [`npx skills`](https://www.skills.sh/):
+
+```bash
+npx skills add altstoreio/skills
+```
+
+This auto-discovers skills from the marketplace manifest and installs them for your detected agent (Claude Code, OpenCode, etc.). To target a specific agent:
+
+```bash
+npx skills add altstoreio/skills -a claude-code
+```
+
+## Example Workflow
+
+### AltStore Classic Distribution
+
+```
+You: Can you help me distribute my app on AltStore Classic?
+
+Claude: I'll get started fetching the AltStore template, identifying the IPA, and enriching it from the IPA now. What would you like to call your source?
+
+You: Adam's Source
+
+...
+
+Claude: Here's your source JSON:
+
+[source.json]
+
+...
+
+🚀 You can upload this file to your web host now, then add the hosted file's URL in AltStore Classic on your phone to see it in action. 🚀
+```
+
+## Repository Layout
+
+```
+.claude-plugin/marketplace.json     # Claude Code marketplace
+.agents/plugins/marketplace.json    # Codex marketplace
+.cursor-plugin/marketplace.json     # Cursor marketplace
+altstore/                           # The plugin (one per brand)
+  .claude-plugin/plugin.json
+  .codex-plugin/plugin.json
+  .cursor-plugin/plugin.json
+  skills/
+    altstore-classic-distribution/  # Individual skill
+      SKILL.md
+      scripts/
+      references/
+```
+
+Additional skills can be added under `altstore/skills/<skill-name>/` without touching any marketplace manifest.
+
+## Support
+
+- [AltStore FAQ](https://faq.altstore.io/)
+- File an issue in this repository
+
+## License
+
+TBD
