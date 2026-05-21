@@ -85,25 +85,6 @@ Claude: Here's your source JSON:
 🚀 You can upload this file to your web host now, then add the hosted file's URL in AltStore Classic on your phone to see it in action. 🚀
 ```
 
-## Repository Layout
-
-```
-.claude-plugin/marketplace.json     # Claude Code marketplace
-.agents/plugins/marketplace.json    # Codex marketplace
-.cursor-plugin/marketplace.json     # Cursor marketplace
-altstore/                           # The plugin (one per brand)
-  .claude-plugin/plugin.json
-  .codex-plugin/plugin.json
-  .cursor-plugin/plugin.json
-  skills/
-    altstore-classic-distribution/  # Individual skill
-      SKILL.md
-      scripts/
-      references/
-```
-
-Additional skills can be added under `altstore/skills/<skill-name>/` without touching any marketplace manifest.
-
 ## Support
 
 - [AltStore FAQ](https://faq.altstore.io/)

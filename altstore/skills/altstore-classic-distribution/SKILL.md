@@ -159,6 +159,8 @@ Use the sidecar's lists verbatim — don't re-derive placeholder keys by reading
 >
 > Or you can get my help — I can guide you on hosting or answer questions about specific key and fill in placeholder values for you.
 
+Silently delete `source.json.placeholders.json`.
+
 ## Stage 2: edit and host, in the developer's preferred order
 
 Stage 2 is always the same two activities: **editing** the remaining placeholder values in `source.json` and **hosting** `source.json` + the IPA on the developer's web host. The order varies; the activities don't. Internally, the two orderings are:
