@@ -50,12 +50,6 @@ Use [`npx skills`](https://www.skills.sh/):
 npx skills add altstoreio/skills
 ```
 
-This auto-discovers skills from the marketplace manifest and installs them for your detected agent (Claude Code, OpenCode, etc.). To target a specific agent:
-
-```bash
-npx skills add altstoreio/skills -a claude-code
-```
-
 ## Example Workflow
 
 ### AltStore Classic Distribution
