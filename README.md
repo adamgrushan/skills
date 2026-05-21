@@ -2,7 +2,7 @@
 
 [AltStore](https://altstore.io/) is an alternative app store for apps that push the boundaries of iOS.
 
-Publish your app via AltStore Classic, without review by Apple, using our skill. Works with **Claude Code and OpenAI Codex via marketplaces**, and **other agentic coding environments via [skills.sh](https://www.skills.sh/)**.
+Distribute and update iOS apps through AltStore Classic using our skill. Works with **Claude Code and OpenAI Codex via marketplaces**, and **other agentic coding environments via [skills.sh](https://www.skills.sh/)**.
 
 ## Installation
 
