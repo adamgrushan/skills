@@ -2,7 +2,7 @@
 
 [AltStore](https://altstore.io/) is an alternative app store for apps that push the boundaries of iOS.
 
-Publish your app via AltStore Classic, without review by Apple, using our skill. Works with **Claude Code, OpenAI Codex, and Cursor via marketplaces**, and **other agentic coding environments via [skills.sh](https://www.skills.sh/)**.
+Publish your app via AltStore Classic, without review by Apple, using our skill. Works with **Claude Code and OpenAI Codex via marketplaces**, and **other agentic coding environments via [skills.sh](https://www.skills.sh/)**.
 
 ## Installation
 
@@ -41,13 +41,6 @@ codex plugin marketplace add altstoreio/skills
 ```
 
 Then, in the Codex app, click **Plugins**, find `AltStore` under the AltStore marketplace, and click the **+** button.
-
-### Cursor
-
-```bash
-cursor plugin marketplace add altstoreio/skills
-cursor plugin install altstore
-```
 
 ### Other agentic coding environments
 

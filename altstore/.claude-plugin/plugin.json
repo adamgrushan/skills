@@ -1,6 +1,6 @@
 {
   "name": "AltStore",
-  "description": "Distribute and update iOS apps through AltStore Classic without App Store review.",
+  "description": "Distribute and update iOS apps through AltStore Classic.",
   "version": "0.1.0",
   "keywords": ["altstore", "ios", "sideload", "ipa", "distribution", "source-json"],
   "author": {
