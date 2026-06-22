@@ -54,7 +54,7 @@ If you can't fetch the template, stop and tell the developer Stage 1 needs inter
 
 ### Step 1.2: Identify the IPA file and enrich from the IPA
 
-Identify the IPA file in the working directory. Then run the enrichment script:
+Identify the IPA file in the working directory. If you can't find one, check for an `.xcodeproj` or `.xcworkspace` — if present, ask the developer if they'd like you to build the IPA with xcodebuild (ad-hoc export). Only proceed on explicit yes; on success, use the produced .ipa for the rest of Stage 1. Then run the enrichment script:
 
 ```bash
 python scripts/enrich_source.py \
