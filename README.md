@@ -42,6 +42,14 @@ codex plugin marketplace add altstoreio/skills
 
 Then, in the Codex app, click **Plugins**, find `AltStore` under the AltStore marketplace, and click the **+** button.
 
+### Xcode 27
+
+From within Xcode 27:
+
+Go to File -> Settings -> Intelligence -> 
+
+Select Add Plug-in, then Skill, and enter the following URL: "" <!-- NEED TO UPDATE THIS -->
+
 ### Other agentic coding environments
 
 Use [`npx skills`](https://www.skills.sh/):
