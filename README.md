@@ -44,11 +44,7 @@ Then, in the Codex app, click **Plugins**, find `AltStore` under the AltStore ma
 
 ### Xcode 27
 
-From within Xcode 27:
-
-Go to File -> Settings -> Intelligence -> 
-
-Select Add Plug-in, then Skill, and enter the following URL: "" <!-- NEED TO UPDATE THIS -->
+Go to Xcode -> Settings -> Intelligence and click the Plug-ins row under Agents in Xcode. Then click the Add Plug-in button. In the sheet, choose Add from URL and click Continue. In the next sheet, enter the following URL: https://github.com/altstoreio/skills.git. Click Continue. In the final sheet, select the skills that you want to install and click Import.
 
 ### Other agentic coding environments
 
