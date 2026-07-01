@@ -81,11 +81,11 @@ The script never touches any other key.
 
 For edge-case behavior (when the IPA has no embedded provisioning profile, what happens to `appPermissions.privacy` if the app declares no usage descriptions, why `developerName` from the profile's TeamName isn't always the display name the developer wants), see the docstring at the top of `scripts/enrich_source.py`. You only need to consult it when something surprising happens.
 
-### Step 1.4: Update the `featuredApps` field
+### Step 1.3: Update the `featuredApps` field
 
 Set `featuredApps` to `[apps[0].bundleIdentifier]` (a single-element list containing the app's bundle identifier).
 
-### Step 1.5: Ask for the source name
+### Step 1.4: Ask for the source name
 
 Ask the developer:
 
@@ -93,7 +93,7 @@ Ask the developer:
 
 Replace `source.json`'s top-level `name` field with their answer. Don't replace anything else.
 
-### Step 1.6: Ask the developer for their Patreon
+### Step 1.5: Ask the developer for their Patreon
 
 Ask the developer:
 
@@ -110,15 +110,15 @@ Branch on the developer's response:
 
 Don't replace any other key in either case.
 
-### Step 1.7: Present the baseline
+### Step 1.6: Present the baseline
 
 **Before composing the message, gather two things:**
 - Whether `patreonURL` has a real value (developer provided one) or is absent (they declined).
 - The full current contents of `source.json`.
 
 **Choose the "filled in" line:**
-- If Patreon was provided: `Your source name, featuredApps, app's keys and Patreon URL are filled in.`
-- If they declined: `Your source name, featuredApps and app's keys are filled in.`
+- If Patreon was provided: `Your source name, featuredApps, various app keys and Patreon URL are filled in.`
+- If they declined: `Your source name, featuredApps and various app keys are filled in.`
 
  Then send this message, substituting the bracketed slots:**
  
@@ -130,7 +130,7 @@ Don't replace any other key in either case.
 >
 > [Filled-in line, chosen above.]
 > 
-> **⚠️ Other keys still have AltStore's example placeholder values.⚠️**
+> **⚠️ Some keys still have AltStore's example placeholder values.⚠️**
 >
 > **☁️⬆️ You can upload this file to your web host now, then add the hosted file's URL in AltStore Classic on your phone to see it in action.☁️⬆️**
 >
@@ -210,9 +210,9 @@ Once the developer says they've hosted the IPA and latest `source.json` files, h
 
 Used by Step 2A.3 and Step 2B.1. The flow has four phases. **Do them in the order below** — the message comes first so the developer has something to read; the rule-pack build happens in parallel with the developer's reading time; the back-and-forth uses the now-ready rule pack as its reference.
 
-### 1. Send an initial message
+### 1. Send an initial message and build the rule pack from the live spec
 
-**Before composing an initial message, gather seven things:**
+**Before composing an initial message, gather five things:**
   - The placeholders report that `enrich_source.py` printed to stdout, between the `---BEGIN PLACEHOLDERS_REPORT---` and `---END PLACEHOLDERS_REPORT---` markers in Step 1.2's output. Parse the JSON between those markers. It contains:
   - `source_level.untouched` — top-level keys still on placeholder values.
   - `app_level.untouched` — `apps[0]` keys still on placeholder values.
@@ -241,13 +241,13 @@ Use the report's lists verbatim — don't re-derive placeholder keys by reading 
 >
 > `[bulleted list — one bullet per key in version_level.untouched from the report; each key in backticks followed by a short description]`
 > 
-> I can answer questions about specific keys or fill in placeholder values for you. Would you like me to take a stab at filling in as many placeholder values as I can based on what I know about your app?
+> ⏳ Before editing the placeholder values I'll need to refer to the live spec from AltStore documentation. Bear with me for a few minutes while I do that. ⏳
 
-### 2. Build the rule pack from the live spec
+**Then build the rule pack following the shared procedure [**Build the rule pack from the live spec**](#shared-procedure-build-the-rule-pack-from-the-live-spec).**
 
-Tell the user that before editing the placeholder values you need to refer to the live spec from AltStore documentation and that it will take a few minutes.
+Then say:
 
-Follow [**Build the rule pack from the live spec**](#shared-procedure-build-the-rule-pack-from-the-live-spec).
+> Alright I'm ready to answer questions about specific keys or fill in placeholder values for you. I can even fill in as many placeholder values as I can based on what I know about your app, if you'd like. How would you like to proceed?
 
 ### 3. Answer questions and fill values, using the rule pack as your reference
 
@@ -419,7 +419,7 @@ Used by Step 2A.1, 2A.5 and Step 2B.3. Start by saying to the developer that we 
 
 **Hosting layout — new repo or existing project repo, both work.** The developer can put `source.json` and their IPA in a fresh repo dedicated to the source, or drop them into their existing Xcode-project repo alongside the code. A dedicated repo keeps the source cleanly separated and easy to point at; reusing the app's repo is one fewer thing to maintain.
 
-**On GitHub, put the app version in the IPA's file path** — e.g., `ipas/1.2.3/MyApp.ipa`, not `MyApp.ipa` at the repo root. Each release gets its own distinct, permanent URL, older versions stay reachable, and the `downloadURL` in `source.json` can point at the new release without overwriting the previous one. Reinforces the "use a stable URL" guidance from the AltStore primer: stable *per version*, not one URL forever.
+- **On GitHub, put the app version in the IPA's filename** — e.g., `MyApp-1.2.3.ipa`, not `MyApp.ipa`. Each release gets its own distinct, permanent URL, older versions stay reachable, and the `downloadURL` in `source.json` can point at the new release without overwriting the previous one. Reinforces the "use a stable URL" guidance from the AltStore primer: stable *per version*, not one URL forever.
 
 **Guidance only — never upload anything yourself unless the developer asks explicitly.** The developer hosts; you advise. Even if your harness has tools for it (S3, GitHub Pages, generic SCP, etc.), don't reach for them unless the developer asks explicitly. Your job here is to tell the developer what their host needs to satisfy and to spot problems if they describe what they've set up.
 
