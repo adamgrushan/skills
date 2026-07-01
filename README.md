@@ -4,6 +4,8 @@
 
 Distribute and update iOS apps through AltStore Classic using our skill. Works with **Claude Code and OpenAI Codex via marketplaces, Xcode 27 via Agents in XCode,** and **other agentic coding environments via [skills.sh](https://www.skills.sh/)**.
 
+Across agentic coding environments, the agent should mention it's using an AltStore skill once prompted. You may need to start a new session after adding the skill so it loads.
+
 ## Installation
 
 ### Claude Code
@@ -44,7 +46,7 @@ Then, in the Codex app, click **Plugins**, find `AltStore` under the AltStore ma
 
 ### Xcode 27
 
-Go to Xcode -> Settings -> Intelligence and click the Plug-ins row under Agents in Xcode. Then click the Add Plug-in button. In the sheet, choose Add from URL and click Continue. In the next sheet, enter the following URL: https://github.com/altstoreio/skills.git. Click Continue. In the final sheet, select the skills that you want to install and click Import.
+Go to Xcode -> Settings -> Intelligence and click the Plug-ins row under Agents in Xcode. Then click the Add Plug-in button. In the sheet, choose Add from URL and click Continue. In the next sheet, enter the following URL: https://github.com/altstoreio/skills.git. Click Continue. In the final sheet, select the skills that you want to install and click Import. 
 
 ### Other agentic coding environments
 

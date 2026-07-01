@@ -1,6 +1,6 @@
 ---
 name: altstore-classic-distribution
-description: Help iOS developers publish or update an app via AltStore Classic. Use this whenever a developer has an .ipa file and wants to distribute or update it through AltStore — including phrases like "AltStore source", "AltStore Classic", "self-host my iOS app", "sideload distribution", "create a source.json", "host my IPA so users can install it", "let people add my app to AltStore", "update my app", or "update my source". Trigger even when the user doesn't say "AltStore" explicitly but is asking how to let other people install their iOS app from a URL outside the App Store or how to update their app. The skill walks through generating a valid AltStore Classic source JSON from an IPA, validating it, and giving host-agnostic deployment guidance.
+description: Help iOS developers publish, update, or add an app thier existing source via AltStore Classic. Use this whenever a developer wants to distribute, update, or add an app to their existing source through AltStore — including phrases like "AltStore source", "AltStore Classic", "self-host my iOS app", "sideload distribution", "create a source.json", "host my IPA so users can install it", "let people add my app to AltStore", "update my app", or "update my source", or "add an app to my source". Trigger even when the user doesn't say "AltStore" explicitly but is asking how to let other people install their iOS app from a URL outside the App Store, how to update their app, or add an app to their source. The skill walks through generating a valid AltStore Classic source JSON from an IPA, validating it, and giving host-agnostic deployment guidance.
 ---
 
 # AltStore Classic Distribution
@@ -133,7 +133,7 @@ Use the report's lists verbatim — don't re-derive placeholder keys by reading 
 >
 > [Filled-in line, chosen above.]
 >
-> **⚠️ All other keys still have AltStore's example placeholder values. ⚠️**
+> **⚠️ The following keys still have AltStore's example placeholder values. ⚠️**
 >
 > Here's the list of source and app keys that are still example placeholder values.
 >
@@ -155,7 +155,7 @@ Use the report's lists verbatim — don't re-derive placeholder keys by reading 
 >
 > `[bulleted list — one bullet per key in version_level.untouched from the report; each key in backticks followed by a short description]`
 >
-> **🚀 You can upload this file to your web host now, then add the hosted file's URL in AltStore Classic on your phone to see it in action. 🚀**
+> **⚠️ You can upload this file to your web host now, then add the hosted file's URL in AltStore Classic on your phone to see it in action. ⚠️**
 >
 > Or you can get my help — I can guide you on hosting or answer questions about specific key and fill in placeholder values for you.
 
@@ -414,7 +414,11 @@ Used by Step 2A.1, 2A.5 and Step 2B.3. Start by saying to the developer that we 
 
 ## Updating apps
 
-The "Updating Apps" page in `references/living-docs.md` is the source of truth for updating apps. Follow the "Update Instructions" on the page and read it before answering app update questions.
+The "Updating Apps" page in `references/living-docs.md` is the source of truth for updating apps. Read the "Update Instructions" on the page before answering app update questions.
+
+## Adding apps
+
+The "Make a Source" page in `references/living-docs.md` is the source of truth for adding apps. Read the `Apps` key documentation on the page before answering app addition questions. Your first attempt to add the app should update an existing `source.json` file.
 
 ## When the developer hits friction
 
