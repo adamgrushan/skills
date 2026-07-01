@@ -81,7 +81,11 @@ The script never touches any other key.
 
 For edge-case behavior (when the IPA has no embedded provisioning profile, what happens to `appPermissions.privacy` if the app declares no usage descriptions, why `developerName` from the profile's TeamName isn't always the display name the developer wants), see the docstring at the top of `scripts/enrich_source.py`. You only need to consult it when something surprising happens.
 
-### Step 1.3: Ask for the source name
+### Step 1.4: Update the `featuredApps` field
+
+Set `featuredApps` to `[apps[0].bundleIdentifier]` (a single-element list containing the app's bundle identifier).
+
+### Step 1.5: Ask for the source name
 
 Ask the developer:
 
@@ -89,7 +93,7 @@ Ask the developer:
 
 Replace `source.json`'s top-level `name` field with their answer. Don't replace anything else.
 
-### Step 1.4: Ask the developer for their Patreon
+### Step 1.6: Ask the developer for their Patreon
 
 Ask the developer:
 
@@ -106,58 +110,31 @@ Branch on the developer's response:
 
 Don't replace any other key in either case.
 
-### Step 1.5: Present the baseline
+### Step 1.7: Present the baseline
 
-**Before composing the message, gather three things:**
-- The placeholders report that `enrich_source.py` printed to stdout, between the `---BEGIN PLACEHOLDERS_REPORT---` and `---END PLACEHOLDERS_REPORT---` markers in Step 1.2's output. Parse the JSON between those markers. It contains:
-  - `source_level.untouched` — top-level keys still on placeholder values.
-  - `app_level.untouched` — `apps[0]` keys still on placeholder values.
-  - `version_level.untouched` — `apps[0].versions[0]` keys still on placeholder values (most importantly `downloadURL`, which the developer must set before the source works).
-  - `caller_should_filter` — keys you must drop from `source_level.untouched` based on later steps' outcomes: drop `name` (Step 1.3 always sets it); drop `patreonURL` only if Step 1.4 set a real value, keep it if the developer declined.
+**Before composing the message, gather two things:**
 - Whether `patreonURL` has a real value (developer provided one) or is absent (they declined).
 - The full current contents of `source.json`.
 
-Use the report's lists verbatim — don't re-derive placeholder keys by reading the JSON yourself. The script is the source of truth here.
-
 **Choose the "filled in" line:**
-- If Patreon was provided: `Your app's keys, source name, and Patreon URL are filled in.`
-- If they declined: `Your app's keys and source name are filled in.`
+- If Patreon was provided: `Your source name, featuredApps, app's keys and Patreon URL are filled in.`
+- If they declined: `Your source name, featuredApps and app's keys are filled in.`
 
-**Send this message, substituting the bracketed slots:**
-
-> Here's your JSON: `[absolute path to source.json]`
+ Then send this message, substituting the bracketed slots:**
+ 
+> Here's your source JSON: `[absolute path to source.json]`. 
 >
 > ```json
 > [paste the entire current contents of source.json verbatim, preserving formatting]
 > ```
 >
 > [Filled-in line, chosen above.]
+> 
+> **⚠️ Other keys still have AltStore's example placeholder values.⚠️**
 >
-> **⚠️ The following keys still have AltStore's example placeholder values. ⚠️**
+> **☁️⬆️ You can upload this file to your web host now, then add the hosted file's URL in AltStore Classic on your phone to see it in action.☁️⬆️**
 >
-> Here's the list of source and app keys that are still example placeholder values.
->
-> **Source-level keys**
->
-> These show up on the catalog page users see when they paste your URL into AltStore — your storefront. 
->
-> `[bulleted list — one bullet per key in source_level.untouched from the report (after applying caller_should_filter); each key in backticks followed by a short description]`
->
-> **App-level keys (inside `apps[0]`)** 
->
-> These show up on the app's detail page inside AltStore.
->
-> `[bulleted list — one bullet per key in app_level.untouched from the report; each key in backticks followed by a short description]`
->
-> **Version-level keys (inside `apps[0].versions[0]`)**
->
-> These describe this specific release — most importantly `downloadURL`, which AltStore needs to find your IPA.
->
-> `[bulleted list — one bullet per key in version_level.untouched from the report; each key in backticks followed by a short description]`
->
-> **⚠️ You can upload this file to your web host now, then add the hosted file's URL in AltStore Classic on your phone to see it in action. ⚠️**
->
-> Or you can get my help — I can guide you on hosting or answer questions about specific key and fill in placeholder values for you.
+> **💬 Or you can get my help — I can guide you on hosting or answer questions about specific keys and fill in placeholder values for you.💬**
 
 ## Stage 2: edit and host, in the developer's preferred order
 
@@ -185,10 +162,9 @@ Help the developer upload only their `source.json` file. Ignore their IPA file f
 
 #### Step 2A.2: Confirm the `source.json` file is hosted
 
-Once the developer says they've hosted the `source.json` file, have them:
-- `curl` (or open in a browser) the source URL and confirm they return the expected JSON file
+Once the developer says they've hosted the `source.json` file, have them try to add the source in AltStore. Mention that they won't be able to download their app yet.
 
-Once the check passes, take a beat and ask the developer:
+Once they can add the source, take a beat and ask the developer:
 
 > Want to replace the remaining placeholders now?
 
@@ -208,9 +184,7 @@ See [**Hosting guidance**](#shared-procedure-hosting-guidance) below.
 
 #### Step 2A.6: Confirm the `source.json` and IPA files are hosted
 
-Once the developer says they've hosted the IPA and latest `source.json` files, have them:
-- `curl` (or open in a browser) the source URL and confirm they return the expected JSON file 
-- `curl` the public URL where the `.ipa` lives and confirm they return the expected IPA file
+Once the developer says they've hosted the IPA and latest `source.json` files, have them try to add the source in AltStore and downlad their app.
 
 ### Stage 2B — Edit First
 
@@ -230,35 +204,68 @@ See [**Hosting guidance**](#shared-procedure-hosting-guidance) below.
 
 #### Step 2B.4: Confirm the hosting is live
 
-Once the developer says they've hosted the IPA and latest `source.json` files, have them:
-- `curl` (or open in a browser) the source URL and confirm they return the expected JSON file 
-- `curl` the public URL where the `.ipa` lives and confirm they return the expected IPA file
+Once the developer says they've hosted the IPA and latest `source.json` files, have them try to add the source in AltStore and downlad their app.
 
 ## Shared procedure: Replace remaining placeholders
 
-Used by Step 2A.3 and Step 2B.1. The flow has three phases. **Do them in the order below** — the message comes first so the developer has something to read; the rule-pack build happens in parallel with the developer's reading time; the back-and-forth uses the now-ready rule pack as its reference.
+Used by Step 2A.3 and Step 2B.1. The flow has four phases. **Do them in the order below** — the message comes first so the developer has something to read; the rule-pack build happens in parallel with the developer's reading time; the back-and-forth uses the now-ready rule pack as its reference.
 
-### 1. Build the rule pack from the live spec
+### 1. Send an initial message
+
+**Before composing an initial message, gather seven things:**
+  - The placeholders report that `enrich_source.py` printed to stdout, between the `---BEGIN PLACEHOLDERS_REPORT---` and `---END PLACEHOLDERS_REPORT---` markers in Step 1.2's output. Parse the JSON between those markers. It contains:
+  - `source_level.untouched` — top-level keys still on placeholder values.
+  - `app_level.untouched` — `apps[0]` keys still on placeholder values.
+  - `version_level.untouched` — `apps[0].versions[0]` keys still on placeholder values (most importantly `downloadURL`, which the developer must set before the source works).
+  - `caller_should_filter` — keys you must drop from `source_level.untouched` based on later steps' outcomes: drop `name` (Step 1.3 always sets it); drop `patreonURL` only if Step 1.4 set a real value, keep it if the developer declined.
+
+Use the report's lists verbatim — don't re-derive placeholder keys by reading the JSON yourself. The script is the source of truth here.
+
+>  **⚠️ So you're aware, the following keys still have AltStore's example placeholder values. ⚠️**
+>
+> **Source-level keys**
+>
+> These show up on the catalog page users see when they paste your URL into AltStore — your storefront. 
+>
+> `[bulleted list — one bullet per key in source_level.untouched from the report (after applying caller_should_filter); each key in backticks followed by a short description]`
+>
+> **App-level keys (inside `apps[0]`)** 
+>
+> These show up on the app's detail page inside AltStore.
+>
+> `[bulleted list — one bullet per key in app_level.untouched from the report; each key in backticks followed by a short description]`
+>
+> **Version-level keys (inside `apps[0].versions[0]`)**
+>
+> These describe this specific release — most importantly `downloadURL`, which AltStore needs to find your IPA.
+>
+> `[bulleted list — one bullet per key in version_level.untouched from the report; each key in backticks followed by a short description]`
+> 
+> I can answer questions about specific keys or fill in placeholder values for you. Would you like me to take a stab at filling in as many placeholder values as I can based on what I know about your app?
+
+### 2. Build the rule pack from the live spec
 
 Tell the user that before editing the placeholder values you need to refer to the live spec from AltStore documentation and that it will take a few minutes.
 
 Follow [**Build the rule pack from the live spec**](#shared-procedure-build-the-rule-pack-from-the-live-spec).
 
-### 2. Answer questions and fill values, using the rule pack as your reference
+### 3. Answer questions and fill values, using the rule pack as your reference
 
 When the developer responds, route their request through the following logic:
+
+- **If they ask you to take a stab at filling in as many placeholder values as you can based on what you know about your app**, edit the `source.json` using the context you have about their app, then share which keys still have AltStore's example placeholder values.
 
 - **If they say they'll self-edit:** confirm with something brief — *"Got it. Ping me with questions, or let me know when you're ready and I'll validate the source."* Stop the back-and-forth and proceed to the next step (validation). Re-enter this procedure on demand if they come back with questions.
 
 - **If they ask about a specific key:** look it up in the rule pack at `spec.objects[<Object>].fields[<keyname>]`. Use the field's `body` to answer accurately — the spec's own prose is the authoritative explanation, so prefer its wording over your own paraphrase when explaining what a field is for. Surface any hint-box constraint (hex format, URL form, character count, etc.). If there's a non-null `enum`, list the allowed values.
 
-- **If they want you to fill in a value:** ask any clarifying questions, then validate the value against the rule pack's `type`, `enum`, and hint-box constraints before writing. If the value doesn't satisfy a constraint (e.g. they offer `"red"` for a hex `tintColor`), explain what's needed and ask for a corrected one rather than writing something the decoder will reject.
+- **If they want you to fill in a specific value:** ask any clarifying questions, then validate the value against the rule pack's `type`, `enum`, and hint-box constraints before writing. If the value doesn't satisfy a constraint (e.g. they offer `"red"` for a hex `tintColor`), explain what's needed and ask for a corrected one rather than writing something the decoder will reject.
 
 - **If they ask about something not in the rule pack:** the field may have been added to the spec since you last built the pack, or they may be confusing concepts. Reread the relevant object section in the rule pack first; if it genuinely isn't there, say so plainly.
 
 Continue the back-and-forth until the developer signals they're done with placeholders.
 
-### 3. Mention what's possible beyond the basic source
+### 4. Mention what's possible beyond the basic source
 
 Once the developer is done with placeholders — and before proceeding to validation — mention two capabilities the spec supports that didn't come up:
 
@@ -409,6 +416,10 @@ In short: the report is for your reasoning; the conversation is for the develope
 ## Shared procedure: Hosting guidance
 
 Used by Step 2A.1, 2A.5 and Step 2B.3. Start by saying to the developer that we suggest using GitHub Pages, but that any web host works —  Cloudflare Pages, Netlify, Vercel, S3+CloudFront, or a plain VPS. Then provide the developer guidance based on their questions.
+
+**Hosting layout — new repo or existing project repo, both work.** The developer can put `source.json` and their IPA in a fresh repo dedicated to the source, or drop them into their existing Xcode-project repo alongside the code. A dedicated repo keeps the source cleanly separated and easy to point at; reusing the app's repo is one fewer thing to maintain.
+
+**On GitHub, put the app version in the IPA's file path** — e.g., `ipas/1.2.3/MyApp.ipa`, not `MyApp.ipa` at the repo root. Each release gets its own distinct, permanent URL, older versions stay reachable, and the `downloadURL` in `source.json` can point at the new release without overwriting the previous one. Reinforces the "use a stable URL" guidance from the AltStore primer: stable *per version*, not one URL forever.
 
 **Guidance only — never upload anything yourself unless the developer asks explicitly.** The developer hosts; you advise. Even if your harness has tools for it (S3, GitHub Pages, generic SCP, etc.), don't reach for them unless the developer asks explicitly. Your job here is to tell the developer what their host needs to satisfy and to spot problems if they describe what they've set up.
 
