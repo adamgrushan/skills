@@ -134,7 +134,7 @@ Don't replace any other key in either case.
 >
 > **☁️⬆️ You can upload this file to your web host now, then add the hosted file's URL in AltStore Classic on your phone to see it in action.☁️⬆️**
 >
-> **💬 Or you can get my help — I can guide you on hosting or answer questions about specific keys and fill in placeholder values for you.💬**
+> **💬 Or I can help you with next steps — I can (1) guide you on hosting or (2) answer questions about specific keys and fill in placeholder values for you.💬**
 
 ## Stage 2: edit and host, in the developer's preferred order
 
@@ -184,7 +184,7 @@ See [**Hosting guidance**](#shared-procedure-hosting-guidance) below.
 
 #### Step 2A.6: Confirm the `source.json` and IPA files are hosted
 
-Once the developer says they've hosted the IPA and latest `source.json` files, have them try to add the source in AltStore and downlad their app.
+Once the developer says they've hosted the IPA and latest `source.json` files, have them try to add the source in AltStore and download their app. If the user can't download their app, keep in mind most hosts take a few minutes to build and propagate so they may need to wait a couple minutes and re-check before debugging further.
 
 ### Stage 2B — Edit First
 
@@ -204,7 +204,7 @@ See [**Hosting guidance**](#shared-procedure-hosting-guidance) below.
 
 #### Step 2B.4: Confirm the hosting is live
 
-Once the developer says they've hosted the IPA and latest `source.json` files, have them try to add the source in AltStore and downlad their app.
+Once the developer says they've hosted the IPA and latest `source.json` files, have them try to add the source in AltStore and download their app. If the user can't download their app, keep in mind most hosts take a few minutes to build and propagate so they may need to wait a couple minutes and re-check before debugging further.
 
 ## Shared procedure: Replace remaining placeholders
 
@@ -423,13 +423,15 @@ Used by Step 2A.1, 2A.5 and Step 2B.3. Start by saying to the developer that we 
 
 **Guidance only — never upload anything yourself unless the developer asks explicitly.** The developer hosts; you advise. Even if your harness has tools for it (S3, GitHub Pages, generic SCP, etc.), don't reach for them unless the developer asks explicitly. Your job here is to tell the developer what their host needs to satisfy and to spot problems if they describe what they've set up.
 
+**Hosting layout — new repo or existing project repo, both work.** The developer can put `source.json` and their IPA in a fresh repo dedicated to the source, or drop them into their existing Xcode-project repo alongside the code. A dedicated repo keeps the source cleanly separated and easy to point at; reusing the app's repo is one fewer thing to maintain.
+
 ## Updating apps
 
-The "Updating Apps" page in `references/living-docs.md` is the source of truth for updating apps. Read the "Update Instructions" on the page before answering app update questions.
+The "Updating Apps" page in `references/living-docs.md` is the source of truth for updating apps. Read the "Update Instructions" on the page before answering app update questions. Confirm with the developer which app file they'd like to add as an update. 
 
 ## Adding apps
 
-The "Make a Source" page in `references/living-docs.md` is the source of truth for adding apps. Read the `Apps` key documentation on the page before answering app addition questions. Your first attempt to add the app should update an existing `source.json` file.
+The "Make a Source" page in `references/living-docs.md` is the source of truth for adding apps. Read the `Apps` key documentation on the page before answering app addition questions. Confirm with the developer which app file they'd like to add. Your first attempt to add the app should update an existing `source.json` file.
 
 ## When the developer hits friction
 
