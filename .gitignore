@@ -3,3 +3,7 @@
 
 # Claude Code local settings
 .claude/
+
+# Delta experimental features skill eval workspace (local test artifacts, repo clones)
+altstore/skills/delta-experimental-features-workspace/
+altstore/skills/delta-experimental-features/evals/
