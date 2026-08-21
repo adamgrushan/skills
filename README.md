@@ -8,9 +8,9 @@ Across agentic coding environments, the agent should mention it's using an AltSt
 
 ## Installation
 
-### Claude Code
+### Claude Code Desktop App
 
-From within Claude Code:
+First, run the following command in your terminal:
 
 ```
 /plugin
@@ -18,31 +18,29 @@ From within Claude Code:
 
 Then select `Marketplace`, `+ Add Marketplace`, enter `altstoreio/skills`. Then install the `AltStore` plugin.
 
-Or directly:
+### Claude Code CLI
 
 ```
-/plugin marketplace add altstoreio/skills
-/plugin install AltStore@AltStore
+claude plugins marketplace add altstoreio/skills
+claude plugins install AltStore
 ```
-
-### OpenAI Codex CLI
-
-```bash
-codex plugin marketplace add altstoreio/skills
-codex plugin add AltStore@AltStore
-```
-
-Or start Codex, run `/plugins`, search for `AltStore`, and install.
 
 ### OpenAI Codex Desktop App
 
-First, add the marketplace from your terminal:
+First, install the marketplace by running the following command in your terminal:
 
-```bash
+```
 codex plugin marketplace add altstoreio/skills
 ```
 
-Then, in the Codex app, click **Plugins**, find `AltStore` under the AltStore marketplace, and click the **+** button.
+Then, in the Codex app, click **Plugins**, find `AltStore` under the AltStore marketplace, and click the **Install** button.
+
+### OpenAI Codex CLI
+
+```
+codex plugin marketplace add altstoreio/skills
+codex plugin add AltStore@AltStore
+```
 
 ### Xcode 27
 
