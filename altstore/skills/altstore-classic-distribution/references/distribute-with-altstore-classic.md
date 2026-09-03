@@ -1,6 +1,6 @@
 # Distribute with AltStore Classic
 
-Distributing your app with AltStore Classic is as simple as hosting a source file, which is just a JSON file with information about your app(s), along with your IPA file. Once your source is live, anyone can add the URL in AltStore Classic to download your apps.
+Distributing your app with AltStore Classic is as simple as hosting a source file, which is just a JSON file with information about your app(s), along with your apps' exported IPA (.ipa) files. Once your source is live, anyone can add the URL in AltStore Classic to download your apps.
 
 You control when and how you release your apps — no review by Apple necessary.
 
