@@ -14,8 +14,8 @@ will replace anyway:
 
   apps[0].name                                ← CFBundleDisplayName | CFBundleName
   apps[0].bundleIdentifier                    ← CFBundleIdentifier
-  apps[0].developerName                       ← code signing identity name
-  apps[0].appPermissions.entitlements         ← code signature entitlement keys
+  apps[0].developerName                       ← provisioning profile TeamName
+  apps[0].appPermissions.entitlements         ← provisioning profile Entitlements keys
   apps[0].appPermissions.privacy              ← NS*UsageDescription keys from Info.plist
   apps[0].versions[0].version                 ← CFBundleShortVersionString
   apps[0].versions[0].buildVersion            ← CFBundleVersion
@@ -186,12 +186,12 @@ def _set_field(obj: dict, key: str, value) -> bool:
 
 # Keys the script is responsible for filling. Used both during enrichment and
 # afterwards to compute the complement (which keys still hold AltStore's
-# example placeholder values) for the Step 1.5 report. Kept as module-level
+# example placeholder values) for the placeholders report. Kept as module-level
 # constants so the "filled" and "untouched" lists can't drift apart.
 #
 # `apps` is a structural container — the script modifies apps[0]'s contents,
 # not the `apps` key itself, but we exclude it from the source-level
-# placeholder list because Step 1.5 reports the storefront keys the developer
+# placeholder list because the report lists the storefront keys the developer
 # still needs to edit, and `apps` isn't one of them.
 _STRUCTURAL_SOURCE_KEYS = {"apps"}
 _FILLED_APP_KEYS = {
@@ -248,7 +248,7 @@ def enrich(placeholder: dict, meta: dict) -> list[str]:
         if perms.get("entitlements") != ent:
             perms["entitlements"] = ent
             notes.append(
-                f"apps[0].appPermissions.entitlements ← {ent!r} (from code signature)"
+                f"apps[0].appPermissions.entitlements ← {ent!r} (from provisioning profile)"
             )
 
     priv = meta.get("privacy")
@@ -307,20 +307,21 @@ def compute_placeholders(placeholder: dict) -> dict:
     because the script fills five of the version-object's keys (version,
     buildVersion, minOSVersion, date, size) but leaves others (downloadURL,
     localizedDescription, etc.) — and `downloadURL` is the single most
-    important key the developer still has to set, so Step 1.5 needs to
+    important key the developer still has to set, so the report needs to
     surface it on its own line.
 
     Two categories deliberately excluded from `source_level.untouched`:
       - `apps` — structural container, not a developer-facing storefront field.
       - `name` and `patreonURL` — both *could* still hold placeholders here
-        (Steps 1.3 and 1.4 set them later). The script can't know whether
-        they're real values yet, so it leaves them in the untouched list and
-        the caller filters at Step 1.5 time. (They're flagged in the
+        (the source-name and Patreon steps set them later). The script can't
+        know whether they're real values yet, so it leaves them in the
+        untouched list and the caller filters them. (They're flagged in the
         `caller_should_filter` list below.)
 
     Caller-side filtering: `caller_should_filter` lists keys whose status
-    depends on Steps 1.3/1.4 outcomes — drop them from `source_level.untouched`
-    only if the corresponding step set a real value."""
+    depends on those two steps' outcomes — drop them from
+    `source_level.untouched` only if the corresponding step set a real
+    value."""
     report: dict = {
         "source_level": {"untouched": []},
         "app_level": {"untouched": []},
@@ -357,7 +358,7 @@ def main(argv: list[str] | None = None) -> int:
         required=True,
         type=Path,
         help=(
-            "Path to the pruned ClassicSource.json template "
+            "Path to the ClassicSourceExampleForSkill.json template "
             "(must contain apps[0] with at least one entry in versions[])"
         ),
     )
@@ -401,7 +402,7 @@ def main(argv: list[str] | None = None) -> int:
     output.write_text(json.dumps(placeholder, indent=2) + "\n")
 
     # Placeholders report listing which keys still hold AltStore's example
-    # values. Emitted to stdout (not a file) so Step 1.5 can read it directly
+    # values. Emitted to stdout (not a file) so the caller can read it directly
     # from this script's output — avoids leaving a sidecar file the agent
     # would need to remember to clean up.
     report = compute_placeholders(placeholder)

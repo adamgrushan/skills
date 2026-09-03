@@ -1,23 +1,25 @@
 # Distribute with AltStore Classic
 
-Distributing your app with AltStore Classic is as simple as hosting a source file, which is just a JSON file with information about your app(s), along with your apps' exported IPA (.ipa) files. Once your source is live, anyone can add the URL in AltStore Classic to download your apps.
+Distributing your app with AltStore Classic is as simple as hosting a [source file](https://raw.githubusercontent.com/altstoreio/FAQ/main/developers/make-a-source.md), which is just a JSON file with information about your app(s), along with your apps' exported IPA (.ipa) files. Once your source is live, anyone can add the URL in AltStore Classic to download your apps.
 
 You control when and how you release your apps — no review by Apple necessary.
 
+{% hint style="info" %}
+You don't need to sign your IPA. AltStore Classic re-signs apps on your users' devices with their own Apple ID, so unsigned builds work fine.
+{% endhint %}
+
 Before you start, you'll need:
 - An IPA file of your app(s).
-- A publicly accessible web host. GitHub Pages, Cloudflare Pages, Netlify, Vercel, S3 with CloudFront, or your own server are all fine.
+- A publicly accessible web host. See `references/hosting-guidance.md` for more detail.
 
 Once you've got these prerequisites, follow both of the steps outlined below to distribute your apps on AltStore Classic. 🙂 
 
-## Create a source and upload it to your web host
-
-The first step is to make a source, which is just a JSON file with basic metadata about your apps.
-
-Once you've created your source and validated it's correct, upload it to your web host, making sure it's also publicly accessible.
-
 ## Upload your IPA file to your web host
 
-Next, upload your IPA file to your web host, making sure it's publicly accessible.
+The first step is to upload your IPA file to your web host making sure it's publicly accessible.
 
-*Use a stable URL.* The path you publish in your source will become the download location. If your IPA URL changes between releases, existing users won't get updates. So, avoid URLs that include hashes, build IDs, or expiring tokens unless you plan to update the source JSON every release.
+## Create a source and upload it to your web host
+
+The next step is to [make a source](https://raw.githubusercontent.com/altstoreio/FAQ/main/developers/make-a-source.md), which is just a JSON file with basic metadata about your apps.
+
+Once you've created your source and validated it's correct, upload it to your web host, making sure it's also publicly accessible.
