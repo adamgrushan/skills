@@ -41,27 +41,35 @@ Download AltStore's canonical `ClassicSourceExampleForSkill.json` example:
 https://raw.githubusercontent.com/altstoreio/FAQ/main/.gitbook/assets/ClassicSourceExampleForSkill.json
 ```
 
-Save it as `source.json` in the developer's working directory. Every value inside it is still a placeholder from AltStore's template. Stage 1 replaces a small set of those (the IPA-derivable ones and the source name). Stage 2 handles the rest.
+Before saving, check whether `source.json` already exists in the working directory. If it does, you are probably not building a new source — ask whether they meant to [add an app](#adding-apps) or [ship an update](#updating-apps) to the one they have. It may be a source they've already published, and this step would replace it with AltStore's example JSON. Overwrite only if they say plainly that they want to start over.
+
+Otherwise save it as `source.json` in the developer's working directory. Every value inside it is still a placeholder from AltStore's template. Stage 1 replaces a small set of those (the IPA-derivable ones, the source name, `featuredApps`, and possibly `patreonURL`). Stage 2 handles the rest.
 
 If you can't fetch the template, stop and tell the developer what went wrong. Don't write `source.json` from memory instead.
 
-### Step 1.2: Identify the IPA file and enrich from the IPA
+### Step 1.2: Identify the IPA file and extract its app entry
 
-Identify the IPA file in the working directory. If you can't find one, check for an `.xcodeproj` or `.xcworkspace` — if present, ask the developer if they'd like you to build the IPA with xcodebuild (ad-hoc export). Only proceed on explicit yes; on success, use the produced .ipa for the rest of Stage 1. Then run the enrichment script:
+Identify the IPA file in the working directory. If you can't find one, check for an `.xcodeproj` or `.xcworkspace` — if present, ask the developer if they'd like you to build the IPA with xcodebuild (ad-hoc export). Only proceed on explicit yes; on success, use the produced .ipa for the rest of Stage 1. Then run the extraction script:
 
 ```bash
-python scripts/enrich_source.py \
+python3 scripts/enrich_source.py \
   --ipa ./MyApp.ipa \
-  --placeholder ./source.json
+  --template ./source.json
 ```
 
-The script overwrites ten fields with values pulled from the IPA and touches nothing else. For the field-by-field mapping and edge-case behavior (an IPA with no embedded provisioning profile, an app that declares no privacy usage descriptions, why `developerName` isn't always the display name the developer wants), see the docstring at the top of `scripts/enrich_source.py` — you only need to consult it when something surprising happens.
+It writes nothing. It prints an `---BEGIN APP_ENTRY---` block — a complete app object with every field this IPA could supply filled in, and AltStore's example values left wherever nothing was derivable — followed by a `---BEGIN PLACEHOLDERS_REPORT---` block naming what's still a placeholder. Where that app entry goes is the next step's decision, and it differs per flow, which is why the script never writes it anywhere itself.
 
-### Step 1.3: Update the `featuredApps` field
+For the field-by-field mapping and edge-case behavior (an IPA with no embedded provisioning profile, an app that declares no privacy usage descriptions, why `developerName` isn't always the display name the developer wants), see the docstrings and comments in `scripts/enrich_source.py` — you only need those when something surprising happens.
+
+### Step 1.3: Replace the template's app entry
+
+Replace `source.json`'s `apps[0]` with the `APP_ENTRY` object from Step 1.2, verbatim. The template ships exactly one example app, and this is the developer's app taking its place.
+
+### Step 1.4: Update the `featuredApps` field
 
 Set `featuredApps` to `[apps[0].bundleIdentifier]` (a single-element list containing the app's bundle identifier).
 
-### Step 1.4: Ask for the source name
+### Step 1.5: Ask for the source name
 
 Ask the developer:
 
@@ -69,7 +77,7 @@ Ask the developer:
 
 Replace `source.json`'s top-level `name` field with their answer. Don't replace anything else.
 
-### Step 1.5: Ask the developer for their Patreon
+### Step 1.6: Ask the developer for their Patreon
 
 Ask the developer:
 
@@ -77,7 +85,7 @@ Ask the developer:
 >
 > With Patreon you can offer apps exclusively to your Patrons. Find more information here (https://faq.altstore.io/developers/patreon-integration). 
 >
-> You can skip this is you want.
+> You can skip this if you want.
 
 Branch on the developer's response:
 
@@ -86,7 +94,7 @@ Branch on the developer's response:
 
 Don't replace any other key in either case.
 
-### Step 1.6: Present the baseline
+### Step 1.7: Present the baseline
 
 **Before composing the message, gather two things:**
 - Whether `patreonURL` holds the developer's real URL, or still holds the template's example value (they declined).
@@ -149,9 +157,7 @@ Refer to `references/hosting-guidance.md`.
 
 ### Step 2.4: Confirm the `source.json` and IPA files are hosted
 
-Once the developer says both files are hosted, have them add the source in AltStore and download their app.
-
-If they don't have AltStore Classic on their phone yet, point them at https://faq.altstore.io/altstore-classic/how-to-install-altstore-macos and pick this back up once it's installed.
+Once the developer says both files are hosted, have them check it in AltStore. For a new source, that's adding the source URL and downloading the app — if they don't have AltStore Classic on their phone yet, point them at the install guide for their computer — https://faq.altstore.io/altstore-classic/how-to-install-altstore-macos or https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows — and pick this back up once it's installed. For an update or an added app, the source is already in their AltStore — have them refresh it and confirm the new version or app shows up.
 
 If they can't download the app, most hosts take a few minutes to build and propagate — have them wait a couple of minutes and re-check before debugging further.
 
@@ -161,14 +167,14 @@ If they can't download the app, most hosts take a few minutes to build and propa
 
 ### 1. Send an initial message and read the live spec
 
-**Before composing an initial message, gather five things:**
+**Before composing an initial message, gather:**
 - The placeholders report that `enrich_source.py` printed to stdout, between the `---BEGIN PLACEHOLDERS_REPORT---` and `---END PLACEHOLDERS_REPORT---` markers in Step 1.2's output. Parse the JSON between those markers. It contains:
   - `source_level.untouched` — top-level keys still on placeholder values.
   - `app_level.untouched` — `apps[0]` keys still on placeholder values.
   - `version_level.untouched` — `apps[0].versions[0]` keys still on placeholder values (most importantly `downloadURL`, which the developer must set before the source works).
-  - `caller_should_filter` — keys you must drop from `source_level.untouched` based on later steps' outcomes: drop `name` (the source-name step always sets it); drop `patreonURL` only if the developer supplied one, keep it if they declined.
+  - `caller_should_filter` — keys the report snapshotted before Stage 1 wrote them, so you must decide their status: drop `featuredApps` (Step 1.4 always sets it) and `name` (Step 1.5 always sets it); drop `patreonURL` only if the developer supplied one, keep it if they declined.
 
-Use the report's lists verbatim — don't re-derive placeholder keys by reading the JSON yourself. The script is the source of truth here.
+Use the report's lists verbatim — don't re-derive placeholder keys by reading the JSON yourself. The script is the source of truth here. Then send this message:
 
 >  **⚠️ So you're aware, the following keys still have AltStore's example placeholder values. ⚠️**
 >
@@ -200,7 +206,7 @@ https://raw.githubusercontent.com/altstoreio/FAQ/main/developers/make-a-source.m
 
 Use whatever URL-fetching tool your harness gives you. Use the raw markdown URL above, not the rendered page at `faq.altstore.io` — the rendered version omits authoring cues that make accurate extraction easier. If you cannot fetch the page, stop and tell the developer what went wrong.
 
-Then, read the spec for understanding. Read the entire page. Identify each JSON object types it documents (Source, Apps, App Versions, App Permissions, Screenshots, News Items, Patreon, and any others present), and within each object type, identify every individual field.
+Then, read the spec for understanding. Read the entire page. Identify each JSON object type it documents (Source, Apps, App Versions, App Permissions, Screenshots, News Items, Patreon, and any others present), and within each object type, identify every individual field.
 
 Then say:
 
@@ -273,19 +279,25 @@ Translate the findings into plain conversation — never show the report.
 
 - **Status 0.** One short sentence: their source is validated and ready for the next step. Raise a warning only if it's actionable — *"Heads up: your `screenshots` is an empty array. That's allowed, but most sources include at least one. Want to add some?"* Skip the housekeeping ones.
 
-- **Status 1.** Don't dump the list. Take the errors one at a time and ask about each in plain language. Not *"apps[0].tintColor: hint-box constraint violated — value 'red' is not hexadecimal"* but *"Your tint color is 'red', but AltStore needs a 6-digit hex code like `F54F32`. What color do you want for your source's accent?"* Collect the fixes, re-validate, and loop until status is 0.
+- **Status 1.** Don't dump the list. Take the errors one at a time and ask about each in plain language. Not *"apps[0].tintColor: hint-box constraint violated — value 'red' is not hexadecimal"* but *"Your tint color is 'red', but AltStore needs a hexadecimal format like `#F54F32`. What color do you want for your source's accent?"* Collect the fixes, re-validate, and loop until status is 0.
 
 Don't tell the developer their source is ready until the structured report produces a status of 0.
 
 ## Updating apps
 
-The "Updating Apps" page in `references/living-docs.md` is the source of truth for updating apps. Read the "Update Instructions" on the page before answering app update questions. Confirm with the developer which app file they'd like to add as an update.
+The "Updating Apps" page in `references/living-docs.md` is the source of truth for updating apps. Read it before answering app update questions — the detection rules are in its Overview, the upload steps in Update Instructions. Confirm with the developer which IPA is the new version, and which app in their source it belongs to.
+
+Extract its app entry with [**Step 1.2**](#step-12-identify-the-ipa-file-and-extract-its-app-entry), pointing `--template` at a fresh copy of the canonical template rather than at their source. Take only the entry's `versions[0]` — that's this release's `version`, `buildVersion`, `minOSVersion`, `date`, and `size` — and **prepend** it to that app's `versions[]`. The existing entries stay; AltStore reads the array's first entry as the latest release.
 
 Once the new version entry is in place, continue from [**Step 2.2**](#step-22-validate-against-the-live-spec) — validate, host the new IPA and the updated `source.json`, then confirm.
 
 ## Adding apps
 
-The "Make a Source" page in `references/living-docs.md` is the source of truth for adding apps. Read the `Apps` key documentation on the page before answering app addition questions. Confirm with the developer which app file they'd like to add. You may need to do [**Step 1.2**](#step-12-identify-the-ipa-file-and-enrich-from-the-ipa) for your first attempt to add the app the user's existing `source.json` file.
+The "Make a Source" page in `references/living-docs.md` is the source of truth for adding apps. Read the `Apps` key documentation on the page before answering app addition questions. Confirm with the developer which IPA they'd like to add.
+
+Extract its app entry with [**Step 1.2**](#step-12-identify-the-ipa-file-and-extract-its-app-entry), pointing `--template` at a fresh copy of the canonical template rather than at their source. Then **append** that entry to their existing `apps[]`. Step 1.3 replaces `apps[0]` because a new source has only AltStore's example app sitting there; here every app already in the source stays exactly as it is.
+
+The new entry's `bundleIdentifier` must not match an app already in the source — the spec forbids duplicates. Ask whether they want it added to `featuredApps`.
 
 Once the new app entry is in place, continue from [**Step 2.2**](#step-22-validate-against-the-live-spec) — validate, host the new IPA and the updated `source.json`, then confirm.
 

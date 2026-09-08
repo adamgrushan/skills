@@ -29,5 +29,9 @@ Your `downloadURL` needs to serve your IPA file directly to anyone who requests 
 Consumer file-sharing links won't work. iCloud and large Google Drive files return a web page instead of the file, and Dropbox share links get throttled or suspended under download traffic. Avoid signed or expiring URLs for the same reason — once the token expires, so does your app's download.
 
 {% hint style="info" %}
-Patreon-only apps are the exception. Their `downloadURL` is the Patreon post URL. [Learn more](patreon-integration.md)
+Patreon-only apps are the exception — you host on Patreon itself, and attachments are capped at 200 MB each.
+
+- **AltStore Classic** — attach the `.ipa` to your post, publish, then right-click the attachment and use **that** URL as your `downloadURL`. Not the post's own URL.
+- **AltStore PAL** — attach every file in your ADP (`manifest.json`, `signature`, and all `.ipa` files), publish, and use the **post's** URL as your `downloadURL`.
+[Learn more](patreon-integration.md)
 {% endhint %}

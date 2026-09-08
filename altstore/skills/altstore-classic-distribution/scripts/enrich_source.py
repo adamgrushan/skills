@@ -1,22 +1,33 @@
 #!/usr/bin/env python3
 """
-Enrich a placeholder source.json with metadata extracted from an .ipa file.
+Build an AltStore Classic app entry from an .ipa file.
 
-This script is the *IPA-derived* leg of Stage 1. The agent calling this skill
-is expected to have already loaded the canonical AltStore example template
-(`ClassicSourceExampleForSkill.json`); this script's job is to walk that template 
-and replace its example values for the ten IPA-derivable fields with values drawn 
-from the developer's actual IPA.
+Reads the canonical AltStore example template
+(`ClassicSourceExampleForSkill.json`) and an .ipa, and prints the template's
+`apps[0]` object with every field this IPA can supply filled in. **Writes
+nothing.** Where the app entry belongs is the caller's decision, and it
+differs by flow: replacing `apps[0]` when building a new source, appending to
+`apps[]` when adding an app to an existing one, or taking just its
+`versions[0]` when shipping an update. Two of those destinations are sources
+the developer has already published, so this script does not touch files.
 
-Fields filled in from the IPA. These ALWAYS overwrite whatever was in the
-template, since the template's values are example placeholders the developer
-will replace anyway:
+Prints to stdout:
+  - a summary of what was derived
+  - `---BEGIN APP_ENTRY---` … the app object … `---END APP_ENTRY---`
+  - `---BEGIN PLACEHOLDERS_REPORT---` … which keys still hold AltStore's
+    example values … `---END PLACEHOLDERS_REPORT---`
+
+Fields filled in from the IPA. Each overwrites whatever the template had,
+since the template's values are example placeholders the developer will
+replace anyway — but only when this IPA actually yields a value. Any field
+that can't be derived keeps the template's example value and is named in the
+placeholders report so the developer sees it:
 
   apps[0].name                                ← CFBundleDisplayName | CFBundleName
   apps[0].bundleIdentifier                    ← CFBundleIdentifier
   apps[0].developerName                       ← provisioning profile TeamName
   apps[0].appPermissions.entitlements         ← provisioning profile Entitlements keys
-  apps[0].appPermissions.privacy              ← NS*UsageDescription keys from Info.plist
+  apps[0].appPermissions.privacy              ← *UsageDescription keys from Info.plist
   apps[0].versions[0].version                 ← CFBundleShortVersionString
   apps[0].versions[0].buildVersion            ← CFBundleVersion
   apps[0].versions[0].minOSVersion            ← MinimumOSVersion
@@ -29,18 +40,18 @@ of the zipped IPA). Two come from the IPA's embedded provisioning profile
 `Entitlements` keys), also read directly out of the zip.
 
 Exit codes:
-  0  success (placeholder updated)
-  2  IPA, placeholder, or arguments could not be read/parsed
+  0  success (app entry and report printed)
+  2  IPA, template, or arguments could not be read/parsed
 
 Usage:
-    python enrich_source.py \\
+    python3 enrich_source.py \\
         --ipa path/to/MyApp.ipa \\
-        --placeholder path/to/source.json \\
-        [-o output.json]   # default: write back to --placeholder
+        --template path/to/ClassicSourceExampleForSkill.json
 """
 from __future__ import annotations
 
 import argparse
+import copy
 import datetime as _dt
 import json
 import plistlib
@@ -72,15 +83,20 @@ def extract_ipa_metadata(ipa_path: Path) -> dict:
         with zf.open(info_plist_name) as fp:
             plist = plistlib.load(fp)
 
-    # Privacy usage descriptions: every key matching NS*UsageDescription, mapped
+    # Privacy usage descriptions: every key ending in UsageDescription, mapped
     # to the string the developer wrote at build time. AltStore's source spec
     # expects this as a dict on apps[0].appPermissions.privacy. If the app
     # has none (doesn't access any sensitive APIs), this is an empty dict.
+    #
+    # Match on the suffix alone — not every usage-description key carries the
+    # NS prefix (Core NFC's is NFCReaderUsageDescription). The spec asks for
+    # "all the 'UsageDescription' keys", and AltStore checks the declared
+    # permissions against the .ipa and refuses to install an app that under-
+    # declares, so a missed key breaks the install rather than the source.
     privacy = {
         k: v
         for k, v in plist.items()
         if isinstance(k, str)
-        and k.startswith("NS")
         and k.endswith("UsageDescription")
         and isinstance(v, str)
     }
@@ -113,8 +129,9 @@ def extract_signing_metadata(ipa_path: Path) -> dict:
 
     Both keys are None when the IPA has no embedded.mobileprovision (App
     Store-stripped binaries, genuinely unsigned IPAs) or the file can't be
-    parsed. Callers should treat None as "leave the template's example value
-    in place" — Stage 2 will catch the unreplaced placeholder later.
+    parsed. None means "leave the template's example value in place" — and
+    `enrich()` then omits the key from its `filled` set, so the placeholders
+    report lists it and the developer is told it still needs a real value.
 
     Implementation note: embedded.mobileprovision is a CMS (PKCS#7) signed
     container wrapping an XML plist. We don't need to verify the signature
@@ -172,66 +189,71 @@ def extract_signing_metadata(ipa_path: Path) -> dict:
     return result
 
 
-def _set_field(obj: dict, key: str, value) -> bool:
-    """Set obj[key] to value, overwriting whatever was there. Returns True if
-    the stored value actually changed (so the caller can log the diff), False
-    if it already matched or if the incoming value is None (don't write junk)."""
+def _fill(obj: dict, key: str, value, filled: set) -> bool:
+    """Set obj[key] to value, overwriting whatever was there.
+
+    Records `key` in `filled` whenever the IPA actually yielded a value —
+    including when that value already matched what the template had. "Derived
+    from the IPA" and "changed the file" are different questions, and the
+    placeholders report needs the first one: a key we could not derive is
+    still holding AltStore's example value and has to be reported as such.
+
+    Returns True only if the stored value changed, so the caller can log a
+    note. A None value means we couldn't derive it — don't write junk, and
+    don't mark it filled."""
     if value is None:
         return False
+    filled.add(key)
     if obj.get(key) == value:
         return False
     obj[key] = value
     return True
 
 
-# Keys the script is responsible for filling. Used both during enrichment and
-# afterwards to compute the complement (which keys still hold AltStore's
-# example placeholder values) for the placeholders report. Kept as module-level
-# constants so the "filled" and "untouched" lists can't drift apart.
+# Structural containers — the script fills their *contents*, not the keys
+# themselves, so they never belong in the placeholders report. Which leaf keys
+# actually got filled is decided per-run by `enrich()`, not declared here: a
+# static list would claim fields this IPA may not have yielded.
 #
-# `apps` is a structural container — the script modifies apps[0]'s contents,
-# not the `apps` key itself, but we exclude it from the source-level
-# placeholder list because the report lists the storefront keys the developer
-# still needs to edit, and `apps` isn't one of them.
+# `apps`     — the script modifies apps[0]'s contents, not the `apps` key.
+# `versions` — likewise; versions[0]'s contents are reported separately.
 _STRUCTURAL_SOURCE_KEYS = {"apps"}
-_FILLED_APP_KEYS = {
-    "name",
-    "bundleIdentifier",
-    "developerName",
-    "appPermissions",  # children entitlements + privacy are filled
-    "versions",        # structural container — versions[0]'s contents tracked separately
-}
-_FILLED_VERSION_KEYS = {
-    "version",
-    "buildVersion",
-    "minOSVersion",
-    "date",
-    "size",
-}
+_STRUCTURAL_APP_KEYS = {"versions"}
 
 
-def enrich(placeholder: dict, meta: dict) -> list[str]:
-    """Mutate `placeholder` in place, overwriting the ten IPA-derived fields
-    regardless of what the template had in them. Returns a list of
-    human-readable notes describing what was written (so the caller can show
-    the developer)."""
+def enrich(placeholder: dict, meta: dict) -> tuple[list[str], dict]:
+    """Mutate `placeholder` in place, overwriting the IPA-derived fields with
+    whatever this IPA actually yielded.
+
+    Returns `(notes, filled)`:
+      - `notes` — human-readable lines describing what was written, so the
+        caller can show the developer.
+      - `filled` — `{"app": set[str], "version": set[str]}`, naming only the
+        keys this run genuinely derived. Anything absent from these sets still
+        holds AltStore's example value, and `compute_placeholders` must report
+        it. Not every field is derivable from every IPA: an .ipa with no
+        embedded provisioning profile yields no `developerName` and no
+        entitlements, and an Info.plist missing `CFBundleVersion` yields no
+        `buildVersion`."""
     notes: list[str] = []
+    filled: dict = {"app": set(), "version": set()}
 
     apps = placeholder.get("apps")
     if not isinstance(apps, list) or not apps:
         notes.append("warning: placeholder has no apps[] array — nothing to enrich.")
-        return notes
+        return notes, filled
 
     app = apps[0]
     if not isinstance(app, dict):
         notes.append("warning: apps[0] is not an object — nothing to enrich.")
-        return notes
+        return notes, filled
 
-    if _set_field(app, "name", meta["name"]):
+    fa = filled["app"]
+    if _fill(app, "name", meta["name"], fa):
         notes.append(f"apps[0].name ← {meta['name']!r} (from Info.plist)")
-    if _set_field(app, "bundleIdentifier", meta["bundleIdentifier"]):
+    if _fill(app, "bundleIdentifier", meta["bundleIdentifier"], fa):
         notes.append(f"apps[0].bundleIdentifier ← {meta['bundleIdentifier']!r} (from Info.plist)")
-    if _set_field(app, "developerName", meta.get("developerName")):
+    if _fill(app, "developerName", meta.get("developerName"), fa):
         notes.append(f"apps[0].developerName ← {meta['developerName']!r} (from provisioning profile)")
 
     # Entitlements and privacy descriptions live one level deeper, under
@@ -260,39 +282,54 @@ def enrich(placeholder: dict, meta: dict) -> list[str]:
         if perms.get("privacy") != priv:
             perms["privacy"] = priv
             notes.append(
-                f"apps[0].appPermissions.privacy ← {priv!r} (from Info.plist NS*UsageDescription keys)"
+                f"apps[0].appPermissions.privacy ← {priv!r} (from Info.plist UsageDescription keys)"
             )
+
+    # `appPermissions` counts as filled only if BOTH children were derived.
+    # AltStore checks the declared permissions against the downloaded .ipa, so
+    # a half-derived block — real privacy descriptions next to the template's
+    # example entitlements — is worse than an obviously untouched one. Leaving
+    # it out of `filled` puts it back in the report for the developer to fix.
+    if ent is not None and priv is not None:
+        fa.add("appPermissions")
 
     versions = app.get("versions")
     if not isinstance(versions, list) or not versions:
         notes.append("warning: apps[0] has no versions[] array — version metadata not enriched.")
-        return notes
+        return notes, filled
 
     v = versions[0]
     if not isinstance(v, dict):
         notes.append("warning: apps[0].versions[0] is not an object — version metadata not enriched.")
-        return notes
+        return notes, filled
 
+    fv = filled["version"]
     today = _dt.date.today().isoformat()
-    if _set_field(v, "version", meta["version"]):
+    if _fill(v, "version", meta["version"], fv):
         notes.append(f"apps[0].versions[0].version ← {meta['version']!r} (from Info.plist)")
-    if _set_field(v, "buildVersion", meta["buildVersion"]):
+    if _fill(v, "buildVersion", meta["buildVersion"], fv):
         notes.append(f"apps[0].versions[0].buildVersion ← {meta['buildVersion']!r} (from Info.plist)")
-    if _set_field(v, "minOSVersion", meta["minOSVersion"]):
+    if _fill(v, "minOSVersion", meta["minOSVersion"], fv):
         notes.append(f"apps[0].versions[0].minOSVersion ← {meta['minOSVersion']!r} (from Info.plist)")
-    if _set_field(v, "date", today):
+    if _fill(v, "date", today, fv):
         notes.append(f"apps[0].versions[0].date ← {today!r} (today)")
-    if _set_field(v, "size", meta["size"]):
+    if _fill(v, "size", meta["size"], fv):
         notes.append(f"apps[0].versions[0].size ← {meta['size']} (file size in bytes)")
 
-    return notes
+    return notes, filled
 
 
-def compute_placeholders(placeholder: dict) -> dict:
+def compute_placeholders(placeholder: dict, filled: dict) -> dict:
     """Walk the (already-enriched) source.json and return a structured report
-    of which keys still hold AltStore's example placeholder values, so Step
-    1.5 can show the developer exactly what's left to edit without re-deriving
-    the list from prose.
+    of which keys still hold AltStore's example placeholder values, so the
+    Replace-remaining-placeholders procedure can show the developer exactly
+    what's left to edit without re-deriving the list from prose.
+
+    `filled` is the second return value of `enrich()` — the keys that run
+    actually derived. It is required, and it must come from the same run: a
+    static list of "keys the script fills" would be a lie for any IPA that
+    didn't yield all of them, and would hide a stale value instead of
+    reporting it.
 
     Returned shape (always present, may be empty lists):
 
@@ -310,23 +347,21 @@ def compute_placeholders(placeholder: dict) -> dict:
     important key the developer still has to set, so the report needs to
     surface it on its own line.
 
-    Two categories deliberately excluded from `source_level.untouched`:
-      - `apps` — structural container, not a developer-facing storefront field.
-      - `name` and `patreonURL` — both *could* still hold placeholders here
-        (the source-name and Patreon steps set them later). The script can't
-        know whether they're real values yet, so it leaves them in the
-        untouched list and the caller filters them. (They're flagged in the
-        `caller_should_filter` list below.)
+    `apps` is excluded from `source_level.untouched` outright — it's a
+    structural container, not a developer-facing storefront field.
 
-    Caller-side filtering: `caller_should_filter` lists keys whose status
-    depends on those two steps' outcomes — drop them from
-    `source_level.untouched` only if the corresponding step set a real
-    value."""
+    `featuredApps`, `name` and `patreonURL` are a different case. This report
+    is a snapshot taken before the steps that write them, so all three still
+    hold the template's values when it's computed. The script can't know how
+    those steps turn out, so it leaves the keys in `untouched` and names them
+    in `caller_should_filter` for the caller to drop once it knows. Report a
+    key the caller has since filled and you contradict what the developer was
+    just told; hide one it hasn't and they publish an example value."""
     report: dict = {
         "source_level": {"untouched": []},
         "app_level": {"untouched": []},
         "version_level": {"untouched": []},
-        "caller_should_filter": ["name", "patreonURL"],
+        "caller_should_filter": ["featuredApps", "name", "patreonURL"],
     }
 
     # apps is filled-via-children; not a developer-facing key to flag.
@@ -337,14 +372,16 @@ def compute_placeholders(placeholder: dict) -> dict:
     apps = placeholder.get("apps")
     if isinstance(apps, list) and apps and isinstance(apps[0], dict):
         app = apps[0]
+        app_filled = filled.get("app", set()) | _STRUCTURAL_APP_KEYS
         report["app_level"]["untouched"] = [
-            k for k in app.keys() if k not in _FILLED_APP_KEYS
+            k for k in app.keys() if k not in app_filled
         ]
 
         versions = app.get("versions")
         if isinstance(versions, list) and versions and isinstance(versions[0], dict):
+            version_filled = filled.get("version", set())
             report["version_level"]["untouched"] = [
-                k for k in versions[0].keys() if k not in _FILLED_VERSION_KEYS
+                k for k in versions[0].keys() if k not in version_filled
             ]
 
     return report
@@ -354,34 +391,28 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--ipa", required=True, type=Path, help="Path to the .ipa file")
     p.add_argument(
-        "--placeholder",
+        "--template",
         required=True,
         type=Path,
         help=(
             "Path to the ClassicSourceExampleForSkill.json template "
-            "(must contain apps[0] with at least one entry in versions[])"
+            "(must contain apps[0] with at least one entry in versions[]). "
+            "Read only — this script never writes to it."
         ),
-    )
-    p.add_argument(
-        "-o",
-        "--output",
-        type=Path,
-        default=None,
-        help="Output path. Default: write back to --placeholder.",
     )
     args = p.parse_args(argv)
 
     try:
-        placeholder = json.loads(args.placeholder.read_text())
+        template = json.loads(args.template.read_text())
     except OSError as e:
-        print(f"error: cannot read {args.placeholder}: {e}", file=sys.stderr)
+        print(f"error: cannot read {args.template}: {e}", file=sys.stderr)
         return 2
     except json.JSONDecodeError as e:
-        print(f"error: {args.placeholder} is not valid JSON: {e}", file=sys.stderr)
+        print(f"error: {args.template} is not valid JSON: {e}", file=sys.stderr)
         return 2
 
-    if not isinstance(placeholder, dict):
-        print(f"error: {args.placeholder} top-level value must be a JSON object", file=sys.stderr)
+    if not isinstance(template, dict):
+        print(f"error: {args.template} top-level value must be a JSON object", file=sys.stderr)
         return 2
 
     try:
@@ -396,30 +427,38 @@ def main(argv: list[str] | None = None) -> int:
     # the Info.plist-derived fields.
     meta.update(extract_signing_metadata(args.ipa))
 
-    notes = enrich(placeholder, meta)
+    # Work on a copy. Nothing this script does may touch a file on disk — the
+    # caller decides where the app entry goes, and for two of the three flows
+    # that destination is a source the developer has already published.
+    merged = copy.deepcopy(template)
+    notes, filled = enrich(merged, meta)
 
-    output = args.output or args.placeholder
-    output.write_text(json.dumps(placeholder, indent=2) + "\n")
+    apps = merged.get("apps")
+    if not isinstance(apps, list) or not apps or not isinstance(apps[0], dict):
+        print(f"error: {args.template} has no apps[0] object to build from", file=sys.stderr)
+        return 2
+    app_entry = apps[0]
 
-    # Placeholders report listing which keys still hold AltStore's example
-    # values. Emitted to stdout (not a file) so the caller can read it directly
-    # from this script's output — avoids leaving a sidecar file the agent
-    # would need to remember to clean up.
-    report = compute_placeholders(placeholder)
+    report = compute_placeholders(merged, filled)
 
-    print(f"wrote {output}")
     if notes:
         print("filled in from IPA:")
         for n in notes:
             print(f"  {n}")
     else:
-        print("nothing changed — placeholder already had IPA-matching values.")
+        print("nothing derived — the template already matched this IPA.")
     print(
         f"still placeholder: {len(report['source_level']['untouched'])} source-level, "
         f"{len(report['app_level']['untouched'])} app-level, "
         f"{len(report['version_level']['untouched'])} version-level key(s) "
         "(full list in the PLACEHOLDERS_REPORT block below)."
     )
+
+    # Both blocks go to stdout rather than a sidecar file, so the caller reads
+    # them straight out of this run and there's nothing to clean up.
+    print("---BEGIN APP_ENTRY---")
+    print(json.dumps(app_entry, indent=2))
+    print("---END APP_ENTRY---")
     print("---BEGIN PLACEHOLDERS_REPORT---")
     print(json.dumps(report, indent=2))
     print("---END PLACEHOLDERS_REPORT---")
