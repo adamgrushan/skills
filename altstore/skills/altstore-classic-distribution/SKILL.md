@@ -120,7 +120,7 @@ Stage 2 is editing the remaining placeholder values and hosting both `source.jso
 
 If the developer's intent isn't clear, ask **one** disambiguating question without using the path names. Example: *"Want to set up hosting first, or work on filling in the rest of the source first?"*
 
-### Step 2.0 — Host First only: get `source.json` hosted
+### Step 2.0: Get `source.json` hosted (Host First only)
 
 Help the developer upload only their `source.json`, not the IPA yet — see `references/hosting-guidance.md`. Once it's hosted, have them add the source in AltStore on their phone; mention they can't download the app yet. Then ask:
 
@@ -261,7 +261,7 @@ Note the findings, with their citations, before you speak. They're your working 
 
 - **No errors.** One short sentence: their source is validated and ready for the next step. Raise a warning only if it's actionable — *"Heads up: your `screenshots` is an empty array. That's allowed, but most sources include at least one. Want to add some?"*
 
-- **Errors.** Don't dump the list. Take them one at a time and ask about each in plain language. Not *"apps[0].tintColor: hint-box constraint violated — value 'red' is not hexadecimal"* but *"Your tint color is 'red', but AltStore needs a hexadecimal format like `#F54F32`. What color do you want for your source's accent?"* Collect the fixes, re-validate, and loop until no errors remain.
+- **Errors.** Don't dump the list. Take them one at a time and ask about each in plain language. Not *"apps[0].tintColor: hint-box constraint violated — value 'red' is not hexadecimal"* but *"Your tint color is 'red', but AltStore needs a hexadecimal format like `#F54F32`. What color do you want for your app's accent?"* Collect the fixes, re-validate, and loop until no errors remain.
 
 Don't tell the developer their source is ready while an error is outstanding.
 
