@@ -33,5 +33,5 @@ Patreon-only apps are the exception — you host on Patreon itself, and attachme
 
 - **AltStore Classic** — attach the `.ipa` to your post, publish, then right-click the attachment and use **that** URL as your `downloadURL`. Not the post's own URL.
 - **AltStore PAL** — attach every file in your ADP (`manifest.json`, `signature`, and all `.ipa` files), publish, and use the **post's** URL as your `downloadURL`.
-[Learn more](patreon-integration.md)
+[Learn more](https://faq.altstore.io/developers/patreon-integration)
 {% endhint %}

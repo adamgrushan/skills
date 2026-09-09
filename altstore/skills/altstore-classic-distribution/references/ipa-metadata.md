@@ -51,7 +51,7 @@ unzip -p "$IPA" "$PROFILE" | security cms -D -i /dev/stdin | plutil -extract Tea
 
 | `source.json` key | Profile key |
 | --- | --- |
-| `apps[0].developerName` | `TeamName` — the signing account's name, not always what they want shown |
+| `apps[0].developerName` | `TeamName` — the signing account's name, not always what the developer wants shown |
 | `apps[0].appPermissions.entitlements` | the keys of `Entitlements` (extract it as `xml1` and take the `<key>`s; an empty dict is `[]`) |
 
 When there's no `embedded.mobileprovision` at all — App Store-stripped or genuinely unsigned builds — leave both `developerName` and `appPermissions` on the template's values, and count **both** as placeholders. A half-real `appPermissions` block, with real privacy descriptions beside the template's example entitlements, is worse than an obviously untouched one.

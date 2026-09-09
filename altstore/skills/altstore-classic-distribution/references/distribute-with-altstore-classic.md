@@ -1,16 +1,16 @@
 # Distribute with AltStore Classic
 
-## Overview 
+## Overview
 
 Distributing your app with AltStore Classic is as simple as hosting a [source file](https://faq.altstore.io/developers/make-a-source), which is just a JSON file with information about your app(s), along with your apps' exported IPA (.ipa) files. Once your source is live, anyone can add the URL in AltStore Classic to download your apps.
 
 You control when and how you release your apps — no review by Apple necessary.
 
-When ready, follow each of the steps outlined below to begin distributing your apps on AltStore Classic. 🙂 
+When ready, follow each of the steps outlined below to begin distributing your apps on AltStore Classic. 🙂
 
 ## Upload your IPA file to your web host
 
-The first step is to upload your IPA file to your web host making sure it's publicly accessible.
+The first step is to upload your IPA file to your web host, making sure it's publicly accessible.
 
 ## Create a source and upload it to your web host
 

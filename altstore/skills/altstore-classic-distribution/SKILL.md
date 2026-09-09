@@ -9,7 +9,7 @@ description: Help iOS developers manage an AltStore Classic source — create a 
 
 Two rules:
 
-- **Never upload on the developer's behalf unless they explicitly ask.** No `curl`-uploads, `scp`, `rsync`, `aws s3 cp`, `gh release upload`, `git push` to a repo, or any other write to a public web host — including any harness or MCP tool that would do it for you. You tell them what their host needs and flag problems with what they describe; they run the upload.
+- **Never upload on the developer's behalf unless they explicitly ask.** No `curl` uploads, `scp`, `rsync`, `aws s3 cp`, `gh release upload`, `git push` to a repo, or any other write to a public web host — including any harness or MCP tool that would do it for you. You tell them what their host needs and flag problems with what they describe; they run the upload.
 
 - **Don't narrate your work.** Speak when you have a question or a result; otherwise stay quiet. Don't preface tool calls ("Let me look that key up in the spec...") or summarize what you just did ("OK, I've filled in your source!"). **The one exception is a heads-up this file writes for you** — like Step 1.1's kickoff or the ⏳ line before the spec fetch. Send those as written; add none of your own.
 
@@ -40,7 +40,7 @@ https://raw.githubusercontent.com/altstoreio/FAQ/main/.gitbook/assets/ClassicSou
 
 Before saving, check whether `source.json` already exists in the working directory. If it does, ask whether they meant to [add an app](#adding-apps) or [ship an update](#updating-apps) — saving now would replace a source they may have already published. Overwrite only if they plainly say they want to start over.
 
-Otherwise save it as `source.json` in the developer's working directory. Every value is still a placeholder from AltStore's template. Stage 1 replaces a small set: the IPA-derivable ones, the source name, `featuredApps`, and possibly `patreonURL`. Stage 2 handles the rest.
+If no `source.json` exists, save the template as `source.json` in the developer's working directory. Every value is still a placeholder from AltStore's template. Stage 1 replaces a small set: the IPA-derivable ones, the source name, `featuredApps`, and possibly `patreonURL`. Stage 2 handles the rest.
 
 If you can't fetch the template, stop and tell the developer what went wrong. Don't write `source.json` from memory.
 
@@ -70,13 +70,13 @@ Ask the developer:
 
 > Would you like to add Patreon support? If so, what's your Patreon page URL?
 >
-> With Patreon you can offer apps exclusively to your Patrons. Find more information here (https://faq.altstore.io/developers/patreon-integration). 
+> With Patreon you can offer apps exclusively to your Patrons. Find more information here (https://faq.altstore.io/developers/patreon-integration).
 >
 > You can skip this if you want.
 
 Branch on the developer's response:
 
-- If they provided a URL: replace source.json's top-level `patreonURL` field with that URL.
+- If they provided a URL: replace `source.json`'s top-level `patreonURL` field with that URL.
 - If they declined, said no, or didn't give a URL: leave `patreonURL` exactly as the template has it. Don't replace it, don't delete it, don't write an empty string.
 
 Don't replace any other key in either case.
@@ -93,23 +93,23 @@ Don't replace any other key in either case.
 
 **Then send this message, substituting the bracketed slots:**
 
-> Here's your source JSON: `[absolute path to source.json]`. 
+> Here's your source JSON: `[absolute path to source.json]`.
 >
 > ```json
 > [paste the entire current contents of source.json verbatim, preserving formatting]
 > ```
 >
 > [Filled-in line, chosen above.]
-> 
-> **⚠️ Some keys still have AltStore's example placeholder values.⚠️**
+>
+> **⚠️ Some keys still have AltStore's example placeholder values. ⚠️**
 >
 > **You can upload this file to your web host now, then add the hosted file's URL in AltStore Classic on your phone to see it in action.**
 >
 > **Or I can help you with next steps — I can (1) guide you on hosting or (2) answer questions about specific keys and fill in placeholder values for you.**
 
-## Stage 2: edit and host, in the developer's preferred order
+## Stage 2: Edit and host, in the developer's preferred order
 
-Stage 2 is editing the remaining placeholder values and hosting `source.json` + the IPA. The developer picks the order: Host First runs Step 2.0 first, Edit First skips it. From Step 2.1 on, both are identical.
+Stage 2 is editing the remaining placeholder values and hosting both `source.json` and the IPA. The developer picks the order: Host First runs Step 2.0 first; Edit First skips it. From Step 2.1 on, both are identical.
 
 **Never say these labels to the developer.** Not "Stage 2," not "the Host First path," not "Step 2.0," nor any other structural label. From their point of view you're just helping with whatever they asked for next.
 
@@ -136,13 +136,13 @@ See [**Validate against the live spec**](#shared-procedure-validate-against-the-
 
 ### Step 2.3: Walk through hosting requirements for the IPA and `source.json`
 
-Help the developer upload their IPA file first, then update `source.json`'s downloadURL to point at it, then help them upload `source.json` itself. If `source.json` is already hosted, the latest `source.json` replaces the old copy.
+Help the developer upload their IPA file first, then update `source.json`'s `downloadURL` to point at it, then help them upload `source.json` itself. If `source.json` is already hosted, the latest `source.json` replaces the old copy.
 
 Refer to `references/hosting-guidance.md`.
 
 ### Step 2.4: Confirm the `source.json` and IPA files are hosted
 
-Once the developer says both files are hosted, have them check it in AltStore on thier phone. For a new source, that's adding the source URL and downloading the app — if they don't have AltStore Classic on their phone yet, point them at the install guide for their computer: https://faq.altstore.io/altstore-classic/how-to-install-altstore-macos or https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows. For an update or an added app, the source is already in their AltStore — have them refresh it and confirm the new version or app shows up.
+Once the developer says both files are hosted, have them check it in AltStore on their phone. For a new source, that's adding the source URL and downloading the app — if they don't have AltStore Classic on their phone yet, point them at the install guide for their computer: https://faq.altstore.io/altstore-classic/how-to-install-altstore-macos or https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows. For an update or an added app, the source is already in their AltStore — have them refresh it and confirm the new version or app shows up.
 
 If the download fails, have them wait a couple of minutes and re-check — hosts need time to propagate.
 
@@ -150,7 +150,7 @@ If the download fails, have them wait a couple of minutes and re-check — hosts
 
 ### 1. Find the IPA
 
-If the developer confirmed or named one, use it. Otherwise use the `.ipa` in the working directory — if there's more than one, ask which. If there's none but there is an `.xcodeproj` or `.xcworkspace`, offer to build one with xcodebuild (ad-hoc export); proceed only on an explicit yes.
+If the developer confirmed or named one, use it. Otherwise use the `.ipa` in the working directory — if there's more than one, ask which. If there's none but there is an `.xcodeproj` or `.xcworkspace`, offer to build one with `xcodebuild` (ad-hoc export); proceed only on an explicit yes.
 
 ### 2. Read the values
 
@@ -173,15 +173,15 @@ Keep the list of keys you filled.
 
 Go by the keys you recorded, not by how the values look. Then send this message:
 
->  **⚠️ So you're aware, the following keys still have AltStore's example placeholder values. ⚠️**
+> **⚠️ So you're aware, the following keys still have AltStore's example placeholder values. ⚠️**
 >
 > **Source-level keys**
 >
-> These show up on the catalog page users see when they paste your URL into AltStore — your storefront. 
+> These show up on the catalog page users see when they paste your URL into AltStore — your storefront.
 >
 > `[bulleted list — one bullet per source-level placeholder key; each key in backticks followed by a short description]`
 >
-> **App-level keys (inside `apps[0]`)** 
+> **App-level keys (inside `apps[0]`)**
 >
 > These show up on the app's detail page inside AltStore.
 >
@@ -192,8 +192,8 @@ Go by the keys you recorded, not by how the values look. Then send this message:
 > These describe this specific release — most importantly `downloadURL`, which AltStore needs to find your IPA.
 >
 > `[bulleted list — one bullet per version-level placeholder key; each key in backticks followed by a short description]`
-> 
-> ⏳ Before editing the placeholder values I'll need to refer to the live spec from AltStore documentation. Bear with me while I do that. ⏳
+>
+> ⏳ Before editing the placeholder values, I'll need to refer to the live spec from AltStore documentation. Bear with me while I do that. ⏳
 
 Then fetch the spec at:
 
@@ -207,7 +207,7 @@ Read the entire page. Identify each JSON object type it documents (Source, Apps,
 
 Then say:
 
-> Alright I'm ready to answer questions about specific keys or fill in placeholder values for you. I can even fill in as many placeholder values as I can based on what I know about your app, if you'd like. How would you like to proceed?
+> Alright, I'm ready to answer questions about specific keys or fill in placeholder values for you. I can even fill in as many placeholder values as I can based on what I know about your app, if you'd like. How would you like to proceed?
 
 ### 2. Answer questions and fill values, using the spec as your reference
 
@@ -215,13 +215,13 @@ Help the developer with whatever they ask — explaining a key, filling in value
 
 If they say they'll edit on their own, confirm briefly:
 
-> "Got it. Ping me with questions, or let me know when you're ready and I'll validate the source."
+> Got it. Ping me with questions, or let me know when you're ready and I'll validate the source.
 
 Continue the back-and-forth until the developer signals they're done with placeholders.
 
 ### 3. Mention what's possible beyond the basic source
 
-Once they're done with placeholders, mention two capabilities that didn't come up:
+Once they're done with placeholders, mention whichever of these two capabilities hasn't come up yet:
 
 - **News items.** AltStore lets you post short announcements on your source page — things like 'New version released' or 'Now featured on X'. They're optional and your source is fine without them. If you want to add some, just tell me and we can come back to it.
 
@@ -269,7 +269,7 @@ Don't tell the developer their source is ready while an error is outstanding.
 
 The "Updating Apps" page (URL in `references/living-docs.md`) is the source of truth. Read it before answering update questions — detection rules in its Overview, upload steps in Update Instructions. Confirm which IPA is the new version and which app in their source it belongs to.
 
-Read the new IPA's metadata with [**Identify the IPA and read its metadata**](#shared-procedure-identify-the-ipa-and-read-its-metadata). Build this release's `versions[]` entry from the `versions[0]` values you read plus the existing top entry's other keys, ask for this release's notes for `localizedDescription`, and **prepend** it to that app's `versions[]`. The existing entries stay.
+Read the new IPA's metadata with [**Identify the IPA and read its metadata**](#shared-procedure-identify-the-ipa-and-read-its-metadata). Build this release's `versions[]` entry from the `versions[0]` values you read plus the existing top entry's other keys, ask for this release's notes for `localizedDescription`, and **prepend** the new entry to that app's `versions[]`. The existing entries stay.
 
 Once the new version entry is in place, continue from [**Step 2.2**](#step-22-validate-against-the-live-spec) — validate, host the new IPA and the updated `source.json`, then confirm.
 
@@ -286,5 +286,5 @@ Once the new app entry is in place, continue from [**Step 2.2**](#step-22-valida
 ## When the developer hits friction
 
 - **"I changed my source's URL."** AltStore identifies a source by the URL users added, so existing users will see a brand-new source and need to re-add it. Keep the original URL live once published.
-- **"Updates aren't showing up."** Rule out hosting first: (a) is the new version entry in the hosted `source.json`? `curl` it. (b) Is a CDN serving stale JSON? If the hosted file is correct and current, it's a detection question — answer it from the page, not from memory (see [**Updating apps**](#updating-apps)).
-- **"AltStore says `No value associated with key "X"`" or `"Hex code is invalid"` etc.** That's AltStore's Swift `Codable` decoder rejecting your source. The fix path is: (1) reread the spec's entry for field `X` carefully; (2) the docs almost certainly mark `X` as required, or carry a constraint in the body that your value violates, and your validation walkthrough missed it — redo that walkthrough more carefully; (3) supply a real value and re-validate. If the docs genuinely don't mention `X` at all, that's a docs gap — file it with the AltStore team rather than papering over it in this skill. The docs are the spec. If they and AltStore's decoder disagree, don't reconcile them yourself — not with a made-up value, not with prose added to this file.
+- **"Updates aren't showing up."** Rule out hosting first: (a) Is the new version entry in the hosted `source.json`? `curl` it. (b) Is a CDN serving stale JSON? If the hosted file is correct and current, it's a detection question — answer it from the page, not from memory (see [**Updating apps**](#updating-apps)).
+- **"AltStore says `No value associated with key "X"`" or `"Hex code is invalid"` etc.** That's AltStore's Swift `Codable` decoder rejecting the source. The fix path is: (1) reread the spec's entry for field `X` carefully; (2) the docs almost certainly mark `X` as required, or carry a constraint in the body that your value violates, and your validation walkthrough missed it — redo that walkthrough more carefully; (3) supply a real value and re-validate. If the docs genuinely don't mention `X` at all, that's a docs gap — file it with the AltStore team rather than papering over it in this skill. The docs are the spec. If they and AltStore's decoder disagree, don't reconcile them yourself — not with a made-up value, not with prose added to this file.

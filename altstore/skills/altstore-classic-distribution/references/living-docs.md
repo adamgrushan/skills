@@ -3,8 +3,9 @@
 The AltStore Classic source format is defined in the AltStore FAQ repo
 (https://github.com/altstoreio/FAQ). This skill uses those pages as the
 source of truth — there's no embedded copy of the spec here, so the skill
-picks up spec changes the next time the agent fetches. If anything in this skill ever disagrees with those pages, they
-win: update the skill rather than working around the docs.
+picks up spec changes the next time the agent fetches them. If anything in
+this skill ever disagrees with those pages, they win: update the skill
+rather than working around the docs.
 
 The URLs below point at the raw GitBook source markdown. Don't substitute
 the rendered pages on `faq.altstore.io`; they omit authoring cues (inline
