@@ -1,6 +1,6 @@
 ---
 name: altstore-classic-distribution
-description: Help iOS developers manage an AltStore Classic source — create a source, update an app in their source, or add apps to their source. Use when a developer says things like "AltStore Classic", "make a source", "host my IPA so users can install it", "update my app", "update my source", or "add an app to my source". The skill generates a valid source JSON from an IPA, validates it against the live spec, and gives hosting guidance.
+description: Help iOS developers manage an AltStore Classic source — create a source, update an app in their source, or add apps to their source. Use when a developer says things like "AltStore Classic", "make a source", "host my IPA", "update my app", "update my source", or "add an app to my source". The skill generates a source JSON file from an IPA, validates it against the live spec, and gives hosting guidance.
 ---
 
 # AltStore Classic Distribution
@@ -9,16 +9,16 @@ description: Help iOS developers manage an AltStore Classic source — create a 
 
 Two rules:
 
-- **Never upload on the developer's behalf unless they explicitly ask.** No `curl`-uploads, `scp`, `rsync`, `aws s3 cp`, `gh release upload`, `git push` to a Pages repo, or any other write to a public web host — including any harness or MCP tool that would do it for you. You tell them what their host needs and flag problems with what they describe; they run the upload.
+- **Never upload on the developer's behalf unless they explicitly ask.** No `curl`-uploads, `scp`, `rsync`, `aws s3 cp`, `gh release upload`, `git push` to a repo, or any other write to a public web host — including any harness or MCP tool that would do it for you. You tell them what their host needs and flag problems with what they describe; they run the upload.
 
 - **Don't narrate your work.** Speak when you have a question or a result; otherwise stay quiet. Don't preface tool calls ("Let me look that key up in the spec...") or summarize what you just did ("OK, I've filled in your source!"). **The one exception is a heads-up this file writes for you** — like Step 1.1's kickoff or the ⏳ line before the spec fetch. Send those as written; add none of your own.
 
 ## References
 
-- `references/distribute-with-altstore-classic.md` — the developer-facing primer; read it for setup questions this file doesn't cover.
-- `references/hosting-guidance.md` — the source of truth for hosting.
 - `references/living-docs.md` — the AltStore FAQ pages: raw URLs to fetch, rendered URLs to share.
 - `references/ipa-metadata.md` — the commands for reading app metadata out of an IPA.
+- `references/distribute-with-altstore-classic.md` — the developer-facing primer; read it for setup questions this file doesn't cover.
+- `references/hosting-guidance.md` — the source of truth for hosting.
 
 ## Which flow you're in
 
@@ -28,7 +28,7 @@ Two rules:
 
 ## Stage 1: Build the baseline source.json
 
-### Step 1.1: Fetch and edit the canonical template
+### Step 1.1: Fetch the canonical template
 
 Tell the developer you're fetching the template and reading their IPA.
 
@@ -42,7 +42,7 @@ Before saving, check whether `source.json` already exists in the working directo
 
 Otherwise save it as `source.json` in the developer's working directory. Every value is still a placeholder from AltStore's template. Stage 1 replaces a small set: the IPA-derivable ones, the source name, `featuredApps`, and possibly `patreonURL`. Stage 2 handles the rest.
 
-If you can't fetch the template, stop and tell the developer what went wrong. Don't write `source.json` from memory instead.
+If you can't fetch the template, stop and tell the developer what went wrong. Don't write `source.json` from memory.
 
 ### Step 1.2: Identify the IPA and read its metadata
 
@@ -122,7 +122,7 @@ If the developer's intent isn't clear, ask **one** disambiguating question witho
 
 ### Step 2.0 — Host First only: get `source.json` hosted
 
-Help the developer upload only their `source.json`, not the IPA yet — see `references/hosting-guidance.md`. Once it's hosted, have them add the source in AltStore; mention they can't download the app yet. Then ask:
+Help the developer upload only their `source.json`, not the IPA yet — see `references/hosting-guidance.md`. Once it's hosted, have them add the source in AltStore on their phone; mention they can't download the app yet. Then ask:
 
 > Want to replace the remaining placeholders now?
 
@@ -142,17 +142,23 @@ Refer to `references/hosting-guidance.md`.
 
 ### Step 2.4: Confirm the `source.json` and IPA files are hosted
 
-Once the developer says both files are hosted, have them check it in AltStore. For a new source, that's adding the source URL and downloading the app — if they don't have AltStore Classic on their phone yet, point them at the install guide for their computer: https://faq.altstore.io/altstore-classic/how-to-install-altstore-macos or https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows. For an update or an added app, the source is already in their AltStore — have them refresh it and confirm the new version or app shows up.
+Once the developer says both files are hosted, have them check it in AltStore on thier phone. For a new source, that's adding the source URL and downloading the app — if they don't have AltStore Classic on their phone yet, point them at the install guide for their computer: https://faq.altstore.io/altstore-classic/how-to-install-altstore-macos or https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows. For an update or an added app, the source is already in their AltStore — have them refresh it and confirm the new version or app shows up.
 
 If the download fails, have them wait a couple of minutes and re-check — hosts need time to propagate.
 
 ## Shared procedure: Identify the IPA and read its metadata
 
-Stop once you have the values; where they go differs per flow, so return to the step that sent you here.
+### 1. Find the IPA
 
-**Which IPA:** the one the developer confirmed, if the sending section had them confirm one; otherwise the `.ipa` in the working directory — ask if there's more than one. If there's none but there is an `.xcodeproj` or `.xcworkspace`, offer to build one with xcodebuild (ad-hoc export); proceed only on an explicit yes.
+If the developer confirmed or named one, use it. Otherwise use the `.ipa` in the working directory — if there's more than one, ask which. If there's none but there is an `.xcodeproj` or `.xcworkspace`, offer to build one with xcodebuild (ad-hoc export); proceed only on an explicit yes.
 
-**Read the values** in `references/ipa-metadata.md` — it gives the command for each and what to do when one can't be read. Record which keys you read; Step 2.1 works from that list.
+### 2. Read the values
+
+Follow `references/ipa-metadata.md`. It lists each value, the command that reads it, and what to do when one can't be read.
+
+### 3. Record what you read
+
+Keep the list of keys you filled.
 
 ## Shared procedure: Replace remaining placeholders
 
@@ -187,7 +193,7 @@ Go by the keys you recorded, not by how the values look. Then send this message:
 >
 > `[bulleted list — one bullet per version-level placeholder key; each key in backticks followed by a short description]`
 > 
-> ⏳ Before editing the placeholder values I'll need to refer to the live spec from AltStore documentation. Bear with me for a few minutes while I do that. ⏳
+> ⏳ Before editing the placeholder values I'll need to refer to the live spec from AltStore documentation. Bear with me while I do that. ⏳
 
 Then fetch the spec at:
 
@@ -207,7 +213,9 @@ Then say:
 
 Help the developer with whatever they ask — explaining a key, filling in values you can infer from their app, answering questions while they edit. Answer in the spec's own wording, and check any value against the spec before you write it: if it would violate a constraint, explain what's needed and ask for a corrected one. The developer decides what changes — don't invent values they haven't asked for.
 
-If they say they'll edit on their own, confirm briefly — *"Got it. Ping me with questions, or let me know when you're ready and I'll validate the source."*
+If they say they'll edit on their own, confirm briefly:
+
+> "Got it. Ping me with questions, or let me know when you're ready and I'll validate the source."
 
 Continue the back-and-forth until the developer signals they're done with placeholders.
 
@@ -247,31 +255,15 @@ Judgement calls:
 
 Cite every finding: name the object and field, and quote the sentence you applied. That's what lets you re-find the text if the developer pushes back, and what makes the next pass auditable.
 
-### 2. Emit a structured report (internal — do NOT share with the developer)
+### 2. Tell the developer what you found
 
-Write the findings down **for yourself** before you say anything — it's how you decide whether to block, what to raise, and what to recheck. **Don't paste it into the conversation, read it out, or point the developer at a written copy.**
+Note the findings, with their citations, before you speak. They're your working notes, not a deliverable: don't recite them, paste them, or point the developer at them. Errors block shipping; warnings never do.
 
-```
-Status: 0 = no errors (warnings are fine)
-        1 = at least one error — don't ship until fixed
+- **No errors.** One short sentence: their source is validated and ready for the next step. Raise a warning only if it's actionable — *"Heads up: your `screenshots` is an empty array. That's allowed, but most sources include at least one. Want to add some?"*
 
-Errors:
-  - <json path>: <what's wrong>
-    (<Object> > <field> — "<the sentence you applied>")
+- **Errors.** Don't dump the list. Take them one at a time and ask about each in plain language. Not *"apps[0].tintColor: hint-box constraint violated — value 'red' is not hexadecimal"* but *"Your tint color is 'red', but AltStore needs a hexadecimal format like `#F54F32`. What color do you want for your source's accent?"* Collect the fixes, re-validate, and loop until no errors remain.
 
-Warnings:
-  - <json path>: <what's worth raising>
-```
-
-### 3. How to communicate validation results to the developer
-
-Translate the findings into plain conversation.
-
-- **Status 0.** One short sentence: their source is validated and ready for the next step. Raise a warning only if it's actionable — *"Heads up: your `screenshots` is an empty array. That's allowed, but most sources include at least one. Want to add some?"*
-
-- **Status 1.** Don't dump the list. Take the errors one at a time and ask about each in plain language. Not *"apps[0].tintColor: hint-box constraint violated — value 'red' is not hexadecimal"* but *"Your tint color is 'red', but AltStore needs a hexadecimal format like `#F54F32`. What color do you want for your source's accent?"* Collect the fixes, re-validate, and loop until status is 0.
-
-Don't tell the developer their source is ready until the structured report produces a status of 0.
+Don't tell the developer their source is ready while an error is outstanding.
 
 ## Updating apps
 
