@@ -2,9 +2,8 @@
 
 The AltStore Classic source format is defined in the AltStore FAQ repo
 (https://github.com/altstoreio/FAQ). This skill uses those pages as the
-source of truth — there's no embedded copy of the spec here, and no field
-rules in code, so the skill picks up spec changes the next time the agent
-fetches. If anything in this skill ever disagrees with those pages, they
+source of truth — there's no embedded copy of the spec here, so the skill
+picks up spec changes the next time the agent fetches. If anything in this skill ever disagrees with those pages, they
 win: update the skill rather than working around the docs.
 
 The URLs below point at the raw GitBook source markdown. Don't substitute
@@ -15,8 +14,7 @@ tags, italic markers, callout blocks) that make accurate extraction easier.
 
 - https://raw.githubusercontent.com/altstoreio/FAQ/main/developers/make-a-source.md
 
-Source of truth for the source JSON format. Fetched and organized into the
-rule pack.
+Source of truth for the source JSON format.
 
 ## Updating Apps page
 
