@@ -2,7 +2,7 @@
 
 [AltStore](https://altstore.io/) is an alternative app store for apps that push the boundaries of iOS.
 
-Distribute and update iOS apps through AltStore Classic using our skill. Works with **Claude Code and OpenAI Codex via marketplaces, Xcode 27 via Agents in XCode,** and **other agentic coding environments via [skills.sh](https://www.skills.sh/)**.
+Distribute and update iOS apps through AltStore using our skill. Works with **Claude Code and OpenAI Codex via marketplaces, Xcode 27 via Agents in XCode,** and **other agentic coding environments via [skills.sh](https://www.skills.sh/)**.
 
 Across agentic coding environments, the agent should mention it's using an AltStore skill once prompted. You may need to start a new session after adding the skill so it loads.
 
