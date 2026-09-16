@@ -1,6 +1,6 @@
 # Living documentation
 
-The AltStore Classic source format is defined in the AltStore FAQ repo
+The AltStore source format is defined in the AltStore FAQ repo
 (https://github.com/altstoreio/FAQ). This skill uses those pages as the
 source of truth — there's no embedded copy of the spec here, so the skill
 picks up spec changes the next time the agent fetches them. If anything in
@@ -17,18 +17,28 @@ tags, italic markers, callout blocks) that make accurate extraction easier.
 
 Source of truth for the source JSON format.
 
-## Updating Apps page
+## Distribute with AltStore PAL page
 
-- https://raw.githubusercontent.com/altstoreio/FAQ/main/developers/updating-apps.md
+- https://raw.githubusercontent.com/altstoreio/FAQ/main/developers/distribute-with-altstore-pal.md
 
-Source of truth for how AltStore detects and ships updates.
+Covers the PAL prerequisites this skill doesn't walk through: agreeing to
+Apple's Alternative EU Terms Addendum, adding AltStore PAL as an alternative
+marketplace, and submitting the app for notarization. Send a PAL developer
+here if those aren't done; the skill picks up once they have an ADP.
 
 ## REST API page
 
 - https://raw.githubusercontent.com/altstoreio/FAQ/main/developers/rest-api.md
 
-Primarily for AltStore PAL. Not part of the Classic flow — fetch only if the
-developer asks about PAL registration, ADPs, or federation.
+PAL only. Its Download ADP section is how a developer gets their ADP, so
+fetch it when a PAL developer has no ADP locally, or asks about PAL
+registration, ADPs, or federating their source.
+
+## Updating Apps page
+
+- https://raw.githubusercontent.com/altstoreio/FAQ/main/developers/updating-apps.md
+
+Source of truth for how AltStore detects and ships updates.
 
 ## Patreon Integration page
 
@@ -44,6 +54,7 @@ When pointing a developer at the docs during a conversation, share the
 `faq.altstore.io` URLs. They're rendered and human-readable:
 
 - https://faq.altstore.io/developers/make-a-source
-- https://faq.altstore.io/developers/updating-apps
+- https://faq.altstore.io/developers/distribute-with-altstore-pal
 - https://faq.altstore.io/developers/rest-api
+- https://faq.altstore.io/developers/updating-apps
 - https://faq.altstore.io/developers/patreon-integration
