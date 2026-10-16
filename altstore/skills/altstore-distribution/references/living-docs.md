@@ -17,6 +17,14 @@ tags, italic markers, callout blocks) that make accurate extraction easier.
 
 Source of truth for the source JSON format.
 
+## Distribute with AltStore Classic page
+
+- https://raw.githubusercontent.com/altstoreio/FAQ/main/developers/distribute-with-altstore-classic.md
+
+The developer-facing overview of Classic distribution: host the IPA, then
+host a source that points at it. Fetch it for Classic setup questions this
+skill doesn't cover.
+
 ## Distribute with AltStore PAL page
 
 - https://raw.githubusercontent.com/altstoreio/FAQ/main/developers/distribute-with-altstore-pal.md
@@ -54,6 +62,7 @@ When pointing a developer at the docs during a conversation, share the
 `faq.altstore.io` URLs. They're rendered and human-readable:
 
 - https://faq.altstore.io/developers/make-a-source
+- https://faq.altstore.io/developers/distribute-with-altstore-classic
 - https://faq.altstore.io/developers/distribute-with-altstore-pal
 - https://faq.altstore.io/developers/rest-api
 - https://faq.altstore.io/developers/updating-apps

@@ -18,7 +18,6 @@ Two rules:
 - `references/living-docs.md` — the AltStore FAQ pages: raw URLs to fetch, rendered URLs to share.
 - `references/ipa-metadata.md` — the commands for reading app metadata out of an IPA.
 - `references/adp-metadata.md` — the commands for reading app metadata out of an ADP.
-- `references/distribute-with-altstore-classic.md` — the developer-facing primer; read it for setup questions this file doesn't cover.
 
 ## Which flow you're in
 
