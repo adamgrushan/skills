@@ -7,33 +7,29 @@ description: Help iOS developers manage an AltStore source — create a source, 
 
 ## Working contract
 
-Two rules:
+- **Never upload on the developer's behalf unless they explicitly ask.** No writes to a public web host by any route — shell commands, `git push`, or a harness or MCP tool. You tell them what their host needs and flag problems with what they describe; they run the upload.
 
-- **Never upload on the developer's behalf unless they explicitly ask.** No `curl` uploads, `scp`, `rsync`, `aws s3 cp`, `gh release upload`, `git push` to a repo, or any other write to a public web host — including any harness or MCP tool that would do it for you. You tell them what their host needs and flag problems with what they describe; they run the upload.
-
-- **Don't narrate your work.** Speak when you have a question or a result; otherwise stay quiet. Don't preface tool calls ("Let me look that key up in the spec...") or summarize what you just did ("OK, I've filled in your source!"). **The one exception is a heads-up this file writes for you** — like Step 1.1's kickoff.
+- **Don't narrate your work.** Speak when you have a question or a result; otherwise stay quiet. Don't preface tool calls or recap what you just did. The one exception is Step 1.1's kickoff.
 
 ## References
 
-- `references/living-docs.md` — the AltStore FAQ pages: raw URLs to fetch, rendered URLs to share.
-- `references/ipa-metadata.md` — the commands for reading app metadata out of an IPA.
-- `references/adp-metadata.md` — the commands for reading app metadata out of an ADP.
+Every AltStore FAQ page named below has its raw URL (to fetch) and rendered URL (to share) in `references/living-docs.md`.
 
 ## Which flow you're in
 
-This skill does the same three jobs for AltStore Classic and AltStore PAL: make a source, add an app, or ship an update.
+- **Make a source (no source yet)** → [**Stage 1 (the baseline source.json)**](#stage-1-build-the-baseline-sourcejson) and [**Stage 2 (editing and hosting)**](#stage-2-edit-and-host-in-the-developers-preferred-order)
+- **Adding an app to an existing source** → [**Adding apps**](#adding-apps)
+- **Shipping a new version of an app to an existing source** → [**Updating apps**](#updating-apps)
 
-For PAL it assumes the developer has already agreed to Apple's Alternative EU Terms Addendum, added AltStore PAL as an alternative marketplace, and had their build notarized by Apple and processed by AltStore. None of that is covered here — if they haven't finished those steps, send them to https://faq.altstore.io/developers/distribute-with-altstore-pal (raw URL in `references/living-docs.md`).
-
-- **No source yet** → [**Stage 1**](#stage-1-build-the-baseline-sourcejson) and [**Stage 2**](#stage-2-edit-and-host-in-the-developers-preferred-order).
-- **Adding an app to an existing source** → [**Adding apps**](#adding-apps).
-- **Shipping a new version of an app** → [**Updating apps**](#updating-apps).
+For PAL this skill assumes the developer has already added AltStore PAL as an alternative marketplace and had their build notarized by Apple and processed by AltStore. None of that is covered here — if they haven't finished those steps, send them to https://faq.altstore.io/developers/distribute-with-altstore-pal.
 
 ## Stage 1: Build the baseline source.json
 
 ### Step 1.1: Fetch the canonical template
 
-Tell the developer you're fetching the template and reading their IPA/ADP.
+Before fetching, check whether `source.json` already exists in the working directory. If it does, ask whether they meant to [add an app](#adding-apps) or [ship an update](#updating-apps) — it may already be published; overwrite only if they plainly say they want to start over.
+
+Then tell the developer you're fetching the template and reading their IPA/ADP.
 
 Download AltStore's canonical template for the developer's flow. For Classic:
 
@@ -47,15 +43,28 @@ For PAL:
 https://raw.githubusercontent.com/altstoreio/FAQ/main/.gitbook/assets/PALSourceExampleForSkill.json
 ```
 
-Before saving, check whether `source.json` already exists in the working directory. If it does, ask whether they meant to [add an app](#adding-apps) or [ship an update](#updating-apps) — it may already be published; overwrite only if they plainly say they want to start over.
-
-Otherwise save the template as `source.json` there. Every value is still a template placeholder; Steps 1.2–1.7 replace only a few and Stage 2 handles the rest.
+Save the template as `source.json` in the working directory. Every value is still a template placeholder; Stage 1 replaces only a few and Stage 2 handles the rest.
 
 If you can't fetch the template, stop and tell the developer what went wrong. Don't write `source.json` from memory.
 
 ### Step 1.2: Identify the IPA/ADP and read its metadata
 
-See [**Identify the IPA/ADP and read its metadata**](#shared-procedure-identify-the-ipaadp-and-read-its-metadata) below.
+#### Step 1.2.1: Find the IPA/ADP
+
+Classic works from an `.ipa`, PAL from an ADP — a folder holding `manifest.json`, `signature`, and a `variant` directory, so look for that shape rather than an extension.
+
+If the developer confirmed or named one, use it. Otherwise use the one in the working directory — if there's more than one, ask which. If there's none:
+
+- **Classic** — if there's an `.xcodeproj` or `.xcworkspace`, offer to build one with `xcodebuild` (ad-hoc export); proceed only on an explicit yes.
+- **PAL** — the developer must download the ADP using AltStore's REST API, keyed on the ADP ID of their notarized build; the REST API page has the steps. Walk the developer through this.
+
+#### Step 1.2.2: Read the values
+
+For Classic follow `references/ipa-metadata.md`, for PAL follow `references/adp-metadata.md`.
+
+#### Step 1.2.3: Record what you read
+
+Keep the list of keys you filled.
 
 ### Step 1.3: Fill the template's app entry
 
@@ -83,12 +92,7 @@ Ask the developer:
 >
 > You can skip this if you want.
 
-Branch on the developer's response:
-
-- If they provided a URL: replace `source.json`'s top-level `patreonURL` field with that URL.
-- If they declined, said no, or didn't give a URL: leave `patreonURL` exactly as the template has it. Don't replace it, don't delete it, don't write an empty string.
-
-Don't replace any other key in either case.
+If they provide a URL, replace `source.json`'s top-level `patreonURL` field with that URL. Otherwise leave the template's value as is — don't delete or blank it. Don't replace anything else.
 
 ### Step 1.7: Ask the developer for their fediverse username (PAL only)
 
@@ -100,12 +104,7 @@ Skip this step for Classic. For PAL, ask the developer:
 >
 > You can skip this if you want.
 
-Branch on the developer's response:
-
-- If they provided a username: replace `source.json`'s top-level `fediUsername` field with just the name (`utm`, not `@utm@alt.store`).
-- If they declined, said no, or didn't give one: leave `fediUsername` exactly as the template has it. Don't replace it, don't delete it, don't write an empty string.
-
-Don't replace any other key in either case.
+If they provide a username, replace `source.json`'s top-level `fediUsername` field with just the name (`utm`, not `@utm@alt.store`). Otherwise leave the template's value as is — don't delete or blank it. Don't replace anything else.
 
 ### Step 1.8: Present the baseline
 
@@ -129,7 +128,7 @@ Don't replace any other key in either case.
 
 ## Stage 2: Edit and host, in the developer's preferred order
 
-Stage 2 is editing the remaining placeholder values and hosting both `source.json` and the IPA/ADP. The developer picks the order: Host First runs Step 2.0 first; Edit First skips it. From Step 2.1 on, both are identical.
+Stage 2 fills the remaining placeholders and hosts `source.json` and the IPA/ADP. The developer picks the order: Host First starts at Step 2.0, Edit First at Step 2.1.
 
 **Never say structural labels ("Stage 2," "Host First," "Step 2.0") to the developer** — from their point of view you're just helping with whatever they asked for next.
 
@@ -143,52 +142,11 @@ Help the developer upload only their `source.json`, not the IPA/ADP yet. Once it
 
 ### Step 2.1: Replace the remaining placeholders
 
-See [**Replace remaining placeholders**](#shared-procedure-replace-remaining-placeholders) below.
-
-### Step 2.2: Validate against the live spec
-
-See [**Validate against the live spec**](#shared-procedure-validate-against-the-live-spec) below.
-
-### Step 2.3: Walk through hosting requirements for the IPA/ADP and `source.json`
-
-Help the developer upload the IPA/ADP first, point `source.json`'s `downloadURL` at it, then have them upload `source.json` itself (replacing any already-hosted copy). For what `downloadURL` points at per spec, see the Make a Source page (URL in `references/living-docs.md`).
-
-### Step 2.4: Confirm the `source.json` and IPA/ADP files are hosted
-
-Once the developer says both files are hosted, have them check it in AltStore on their phone. For a new source, that's adding the source URL and downloading the app — if they don't have AltStore Classic on their phone yet, point them at the install guide for their computer: https://faq.altstore.io/altstore-classic/how-to-install-altstore-macos or https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows. For PAL direct them to https://altstore.io/download. For an update or an added app, the source is already in their AltStore — have them refresh it and confirm the new version or app shows up.
-
-If the download fails, have them wait a couple of minutes and re-check — hosts need time to propagate.
-
-### Step 2.5: Federate the source (only if they gave a fediverse username in Step 1.7)
-
-Ask whether they still want to federate their source; on a yes, run the Federate Source command from the REST API page (URL in `references/living-docs.md`), passing their hosted `source.json` URL as `source`.
-
-## Shared procedure: Identify the IPA/ADP and read its metadata
-
-### 1. Find the IPA/ADP
-
-Classic works from an `.ipa`, PAL from an ADP — a folder holding `manifest.json`, `signature`, and a `variant` directory, so look for that shape rather than an extension.
-
-If the developer confirmed or named one, use it. Otherwise use the one in the working directory — if there's more than one, ask which. If there's none:
-
-- **Classic** — if there's an `.xcodeproj` or `.xcworkspace`, offer to build one with `xcodebuild` (ad-hoc export); proceed only on an explicit yes.
-- **PAL** — the developer must download the ADP using AltStore's REST API, keyed on the ADP ID of their notarized build; the REST API page (URL in `references/living-docs.md`) has the steps. Walk the developer through this.
-
-### 2. Read the values
-
-For Classic follow `references/ipa-metadata.md`, for PAL follow `references/adp-metadata.md`.
-
-### 3. Record what you read
-
-Keep the list of keys you filled.
-
-## Shared procedure: Replace remaining placeholders
-
-### 1. Send an initial message
+#### Step 2.1.1: Send an initial message
 
 **Before composing an initial message, list which keys still hold placeholder values:**
 - **Source-level** — every top-level key except `apps`, `name` (Step 1.5 sets it), `featuredApps` (Step 1.4 sets it), and whichever of `patreonURL` and `fediUsername` the developer supplied (Steps 1.6 and 1.7).
-- **App-level** — every `apps[0]` key except `versions` and the ones you recorded in [**Identify the IPA/ADP and read its metadata**](#shared-procedure-identify-the-ipaadp-and-read-its-metadata).
+- **App-level** — every `apps[0]` key except `versions` and the ones you recorded in [**Step 1.2**](#step-12-identify-the-ipaadp-and-read-its-metadata).
 - **Version-level** — every `apps[0].versions[0]` key you didn't record, most importantly `downloadURL`, which the developer must set before the source works.
 
 Go by the keys you recorded, not by how the values look. Then send this message, writing IPA for Classic or ADP for PAL:
@@ -215,7 +173,7 @@ Go by the keys you recorded, not by how the values look. Then send this message,
 >
 > I can answer questions about specific keys or fill in placeholder values for you based on what I know about your app. How would you like to proceed?
 
-### 2. Using the spec as your reference, answer questions and fill values
+#### Step 2.1.2: Using the spec as your reference, answer questions and fill values
 
 First read the entire spec:
 
@@ -229,19 +187,19 @@ Then help the developer with whatever they have asked — explaining a key, fill
 
 Continue the back-and-forth until the developer signals they're done with placeholders.
 
-### 3. Mention what's possible beyond the basic source
+#### Step 2.1.3: Mention what's possible beyond the basic source
 
-Once they're done with placeholders, mention whichever of these two capabilities hasn't come up yet:
+Once they're done with placeholders, mention these two capabilities to the extent they haven't come up yet:
 
 - **News items.** AltStore lets you post short announcements on your source page — things like 'New version released' or 'Now featured on X'. They're optional and your source is fine without them. If you want to add some, just tell me and we can come back to it.
 
 - **Shipping updates.** You don't rebuild your source for a new version — you add an entry to the top of the `versions` array, upload the new `.ipa`/ADP, and re-publish `source.json`. AltStore then prompts existing users to update. The rules for what counts as 'newer' are on the Updating Apps page in the AltStore FAQ — I can walk you through them when it's time.
 
-## Shared procedure: Validate against the live spec
+### Step 2.2: Validate against the live spec
 
 *You* are the rule engine — there's no validator to call. If you haven't read the live spec yet, fetch it: https://raw.githubusercontent.com/altstoreio/FAQ/main/developers/make-a-source.md
 
-### 1. Apply the rules, field by field
+#### Step 2.2.1: Apply the rules, field by field
 
 For every field in the developer's `source.json`, find its entry in the spec and check the field against it.
 
@@ -263,7 +221,7 @@ Judgement calls:
 
 Cite every finding: name the object and field, and quote the sentence you applied. That's what lets you re-find the text if the developer pushes back, and what makes the next pass auditable.
 
-### 2. Tell the developer what you found
+#### Step 2.2.2: Tell the developer what you found
 
 Note the findings, with their citations, before you speak. They're your working notes, not a deliverable: don't recite them, paste them, or point the developer at them. Errors block shipping; warnings never do.
 
@@ -273,11 +231,25 @@ Note the findings, with their citations, before you speak. They're your working 
 
 Don't tell the developer their source is ready while an error is outstanding.
 
+### Step 2.3: Walk through hosting requirements for the IPA/ADP and `source.json`
+
+Help the developer upload the IPA/ADP first, point `source.json`'s `downloadURL` at it, then have them upload `source.json` itself (replacing any already-hosted copy). For what `downloadURL` points at per spec, see the Make a Source page.
+
+### Step 2.4: Confirm the `source.json` and IPA/ADP files are hosted
+
+Once the developer says both files are hosted, have them check it in AltStore on their phone. For a new source, that's adding the source URL and downloading the app — if they don't have AltStore Classic on their phone yet, point them at the install guide for their computer: https://faq.altstore.io/altstore-classic/how-to-install-altstore-macos or https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows. For PAL direct them to https://altstore.io/download. For an update or an added app, the source is already in their AltStore — have them refresh it and confirm the new version or app shows up.
+
+If the download fails, have them wait a couple of minutes and re-check — hosts need time to propagate.
+
+### Step 2.5: Federate the source (only if they gave a fediverse username in Step 1.7)
+
+Ask whether they still want to federate their source; on a yes, run the Federate Source command from the REST API page, passing their hosted `source.json` URL as `source`.
+
 ## Updating apps
 
 Read the "Updating Apps" page (URL in `references/living-docs.md`) before answering update questions — detection rules in its Overview, upload steps in Update Instructions. Confirm which IPA/ADP is the new version and which app in their source it belongs to.
 
-Run [**Identify the IPA/ADP and read its metadata**](#shared-procedure-identify-the-ipaadp-and-read-its-metadata) on it. Build this release's `versions[]` entry from the `versions[0]` values you read plus the existing top entry's other keys, ask for release notes for `localizedDescription`, and **prepend** it to that app's `versions[]`, leaving the existing entries alone.
+Run [**Step 1.2**](#step-12-identify-the-ipaadp-and-read-its-metadata) on it. Build this release's `versions[]` entry from the `versions[0]` values you read plus the existing top entry's other keys, ask for release notes for `localizedDescription`, and **prepend** it to that app's `versions[]`, leaving the existing entries alone.
 
 Then continue from [**Step 2.2**](#step-22-validate-against-the-live-spec).
 
@@ -285,7 +257,7 @@ Then continue from [**Step 2.2**](#step-22-validate-against-the-live-spec).
 
 Read the "Make a Source" page's `Apps` documentation (URL in `references/living-docs.md`) before answering app-addition questions. Confirm which IPA/ADP they'd like to add.
 
-Run [**Identify the IPA/ADP and read its metadata**](#shared-procedure-identify-the-ipaadp-and-read-its-metadata) on it. Fetch a fresh copy of the canonical template for their flow (Step 1.1's URL) — don't save it over `source.json` — fill its `apps[0]` as Step 1.3 describes, and **append** that object to their `apps[]`, leaving the existing apps alone. The new entry's `bundleIdentifier` must not match an app already in the source — the spec forbids duplicates. Ask whether they want it added to `featuredApps`.
+Run [**Step 1.2**](#step-12-identify-the-ipaadp-and-read-its-metadata) on it. Fetch a fresh copy of the canonical template for their flow (Step 1.1's URL) — don't save it over `source.json` — fill its `apps[0]` as [**Step 1.3**](#step-13-fill-the-templates-app-entry) describes, and **append** that object to their `apps[]`, leaving the existing apps alone. The new entry's `bundleIdentifier` must not match an app already in the source — the spec forbids duplicates. Ask whether they want it added to `featuredApps`.
 
 Then continue from [**Step 2.2**](#step-22-validate-against-the-live-spec).
 
