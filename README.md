@@ -16,12 +16,12 @@ First, run the following command in your terminal:
 /plugin
 ```
 
-Then select `Marketplace`, `+ Add Marketplace`, enter `altstoreio/skills`. Then install the `AltStore` plugin.
+Then select `Marketplace`, `+ Add Marketplace`, enter `adamgrushan/skills`. Then install the `AltStore` plugin.
 
 ### Claude Code CLI
 
 ```
-claude plugins marketplace add altstoreio/skills
+claude plugins marketplace add adamgrushan/skills
 claude plugins install AltStore
 ```
 
@@ -30,7 +30,7 @@ claude plugins install AltStore
 First, install the marketplace by running the following command in your terminal:
 
 ```
-codex plugin marketplace add altstoreio/skills
+codex plugin marketplace add adamgrushan/skills
 ```
 
 Then, in the Codex app, click **Plugins**, find `AltStore` under the AltStore marketplace, and click the **Install** button.
@@ -38,20 +38,20 @@ Then, in the Codex app, click **Plugins**, find `AltStore` under the AltStore ma
 ### OpenAI Codex CLI
 
 ```
-codex plugin marketplace add altstoreio/skills
+codex plugin marketplace add adamgrushan/skills
 codex plugin add AltStore@AltStore
 ```
 
 ### Xcode 27
 
-Go to Xcode -> Settings -> Intelligence and click the Plug-ins row under Agents in Xcode. Then click the Add Plug-in button. In the sheet, choose Add from URL and click Continue. In the next sheet, enter the following URL: https://github.com/altstoreio/skills.git. Click Continue. In the final sheet, select the skills that you want to install and click Import. 
+Go to Xcode -> Settings -> Intelligence and click the Plug-ins row under Agents in Xcode. Then click the Add Plug-in button. In the sheet, choose Add from URL and click Continue. In the next sheet, enter the following URL: https://github.com/adamgrushan/skills.git. Click Continue. In the final sheet, select the skills that you want to install and click Import. 
 
 ### Other agentic coding environments
 
 Use [`npx skills`](https://www.skills.sh/):
 
 ```bash
-npx skills add altstoreio/skills
+npx skills add adamgrushan/skills
 ```
 
 ## Example Workflow

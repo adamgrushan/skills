@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Distribute and update iOS apps through AltStore Classic.",
   "homepage": "https://altstore.io",
-  "repository": "https://github.com/altstoreio/skills",
+  "repository": "https://github.com/adamgrushan/skills",
   "keywords": ["altstore", "ios", "sideload", "ipa", "distribution", "source-json"],
   "skills": "./skills/",
   "author": {
