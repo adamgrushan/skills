@@ -82,4 +82,4 @@ Claude: Here's your source JSON:
 
 ## License
 
-TBD
+MIT. See [LICENSE](LICENSE).
