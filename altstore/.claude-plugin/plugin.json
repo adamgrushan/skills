@@ -1,8 +1,8 @@
 {
   "name": "AltStore",
-  "description": "Distribute and update iOS apps through AltStore Classic.",
-  "version": "0.1.0",
-  "keywords": ["altstore", "ios", "sideload", "ipa", "distribution", "source-json"],
+  "description": "Distribute iOS apps through AltStore, and build animated controller skins and experimental features for Delta.",
+  "version": "0.2.0",
+  "keywords": ["altstore", "altstore-pal", "ios", "sideload", "ipa", "adp", "distribution", "source-json", "delta", "emulator", "controller-skins", "experimental-features"],
   "author": {
     "name": "AltStore",
     "url": "https://altstore.io",

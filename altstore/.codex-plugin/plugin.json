@@ -1,10 +1,10 @@
 {
   "name": "AltStore",
-  "version": "0.1.0",
-  "description": "Distribute and update iOS apps through AltStore Classic.",
+  "version": "0.2.0",
+  "description": "Distribute iOS apps through AltStore, and build animated controller skins and experimental features for Delta.",
   "homepage": "https://altstore.io",
   "repository": "https://github.com/adamgrushan/skills",
-  "keywords": ["altstore", "ios", "sideload", "ipa", "distribution", "source-json"],
+  "keywords": ["altstore", "altstore-pal", "ios", "sideload", "ipa", "adp", "distribution", "source-json", "delta", "emulator", "controller-skins", "experimental-features"],
   "skills": "./skills/",
   "author": {
     "name": "AltStore",
@@ -13,16 +13,16 @@
   },
   "interface": {
     "displayName": "AltStore",
-    "shortDescription": "Distribute and update iOS apps through AltStore Classic.",
-    "longDescription": "Generate an AltStore Classic source.json so developers can distribute and update their iOS apps through AltStore Classic, providing guidance on hosting and helping edit the source.json file.",
+    "shortDescription": "Distribute iOS apps through AltStore, and build animated controller skins and experimental features for Delta.",
+    "longDescription": "Create and update AltStore sources using an IPA or ADP, with guidance on hosting. Animate Delta controller skins by mapping artwork into info.json and cutting cap assets. Build or review Delta experimental features against Delta's contribution guidelines.",
     "developerName": "AltStore",
     "category": "Productivity",
     "capabilities": ["read", "write"],
     "websiteURL": "https://altstore.io",
     "defaultPrompt": [
-      "Help me distribute my app on AltStore Classic.",
-      "Create an AltStore source.json from my IPA.",
-      "Update my AltStore source for a new app version."
+      "Help me distribute my app on AltStore.",
+      "Map the buttons on my Delta controller skin.",
+      "Review my Delta experimental feature PR."
     ]
   }
 }
